@@ -8,13 +8,14 @@ import {
 import HomePage from './routes/HomePage';
 import RegisterPage from './routes/RegisterPage';
 import RoomPage from './routes/RoomPage';
-
+import ChatView from './components/chat/ChatView';
 
 function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/room/:id" children={<RoomPage/>}/>
+        <Route path="/test" children={<ChatView />} />
+        <Route path="/room/:id" children={<RoomPage />} />
         <Route path="/login">
           <LoginPage />
         </Route>
