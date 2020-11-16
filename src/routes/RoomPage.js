@@ -17,19 +17,19 @@ const useStyles = makeStyles((theme) => ({
     chat: {
         flexGrow: 1,
         width: '100%',
-        padding: '10px',
         background: 'rgb(240, 240, 240)',
     },
     video: {
         width: '100%',
         height: '100%',
+        maxHeight : 'calc(100vh - 132px)'
         //border : "1px solid grey", 
         //borderRadius: "10px" 
     },
     toolbar: {
-        justifyContent : 'center',
+        justifyContent: 'center',
         background: 'white',
-        boxShadow : '0px 0px 5px 0px rgba(0,0,0,0.75)',
+        boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.75)',
         //border : "1px solid grey", 
         //borderRadius: "10px" 
     }
@@ -52,7 +52,10 @@ function RoomPage(params) {
                 }
                 setRoomLoadState("loaded")
                 setRoom(res)
-                setStreamController(new StreamController())
+                const streamController = new StreamController()
+                setStreamController(streamController)
+                streamController.start(res.ID, onStatusChange)
+                streamController.join()
             })
         }
     })
@@ -61,28 +64,46 @@ function RoomPage(params) {
         setConnectionState(text)
     }
 
+    const onShareScreenClick = (e) => {
+        streamController.cancel()
+        streamController.start(room.ID, onStatusChange)
+        streamController.publish()
+    }
+
     if (!room) {
         return <div>Not Found</div>
     }
+
+    const renderShareScreen = () => {
+
+    }
+
+    let roomID = undefined
+    if(room) roomID = room.ID
 
     return (
         <Box display="flex" height="100%" flexDirection="column">
             <MyAppBar title={room && room.Name} />
             <Box display="flex" flexGrow="1">
-                <Box flex="3">
-                    <video className={classes.video} id="id_video" autoPlay muted />
+                <Box flex="3" display="flex" alignItems="center">
+                    <video className={classes.video} id="id_video" autoPlay muted/>
                 </Box>
                 <Box flex="1" className={classes.chat}>
-                    <ChatView> 
+                    <ChatView streamController={streamController} roomID={roomID}>
 
                     </ChatView>
                 </Box>
             </Box>
             <Toolbar className={classes.toolbar}>
-                <Button variant="contained" color="primary">
+                <Button variant="contained" color="primary"
+                    onClick={onShareScreenClick}
+                >
                     Share Screen
+                    {
+
+                    }
                 </Button>
-                <Box width="10px"/>
+                <Box width="10px" />
                 <Button variant="contained" color="primary">
                     Open Microphone
                 </Button>

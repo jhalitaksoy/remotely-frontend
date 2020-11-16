@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import MessageList from './MessageList';
 import MessageSender from './MessageSender';
 import { useState } from 'react';
+import { getChat } from '../../controller/ChatController';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -38,11 +39,33 @@ function ChatView(props) {
 
     const classes = useStyles();
 
-    const [messages, setMessages] = useState(testData)
+    const [messages, setMessages] = useState([])
+
+    const [chatLoadState, setChatLoadState] = useState("loading")
+
+    if (chatLoadState != 'loaded') {
+        getChat(props.roomID, (data, err) => {
+            if (err) {
+                setChatLoadState("error")
+                return
+            }
+            setChatLoadState("loaded")
+            if(data)setMessages(data)
+            console.log("loaded");
+        })
+    }
+
+    const onChatMessage = (message) => {
+        if (chatLoadState == "loaded")
+            setMessages([...messages, message])
+    }
 
     const onSendMessage = (message) => {
-        setMessages([...messages, message])
+        props.streamController.sendChatMessage(message)
     }
+
+    if (props.streamController)
+        props.streamController.onChatMessage = onChatMessage;
 
     return (
         <div className={classes.container}>

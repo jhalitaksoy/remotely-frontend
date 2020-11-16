@@ -7,8 +7,8 @@ import { currentUser } from '../../controller/UserController';
 const useStyles = makeStyles((thme) => ({
     messageSender: {
         display: 'flex',
-        width: '100%',
-        padding: '10px',
+        padding : '10px',
+        background : 'white',
     }
 }))
 
@@ -19,11 +19,11 @@ const MessageSender = (props) => {
         setMessage(event.target.value)
     }
     const onSendMessage = () => {
-        //const user = currentUser()
+        const user = currentUser()
         const newMessage = {
             user: {
-                ID: 0,
-                name: 'Bob',
+                ID: parseInt(user.id),
+                name: '',
             },
             text: message,
         }

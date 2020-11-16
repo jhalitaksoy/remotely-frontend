@@ -2,6 +2,7 @@
 "use strict";
 
 import { serverUrl } from "../service/NetworkService";
+import { currentUser } from "./UserController";
 
 var mediaConstraints = {
     audio: false, // We dont want an audio track
@@ -49,13 +50,28 @@ export class StreamController {
             console.log(event);
         });
         pc.addEventListener("error", (event) => {
-            console.log({err : event});
+            console.log({ err: event });
         });
         return pc
     }
 
     publish() {
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
+
+        // todo : WTF
+        var id = 0
+
+        let sendChannel = this.pc.createDataChannel(id)
+        sendChannel.onclose = () => console.log('sendChannel has closed')
+        sendChannel.onopen = () => {
+            this.sendChannel = sendChannel
+            console.log('sendChannel has opened');
+        }
+        sendChannel.onmessage = this.onMessage
+        sendChannel.addEventListener("error", ev => {
+            console.log({ datachannel_error: ev });
+        })
+
         // Start acquisition of media
         this.startMedia(this.pc)
             .then(function () {
@@ -76,10 +92,13 @@ export class StreamController {
 
         let sendChannel = this.pc.createDataChannel(id)
         sendChannel.onclose = () => console.log('sendChannel has closed')
-        sendChannel.onopen = () => console.log('sendChannel has opened')
+        sendChannel.onopen = () => {
+            this.sendChannel = sendChannel
+            console.log('sendChannel has opened');
+        }
         sendChannel.onmessage = this.onMessage
         sendChannel.addEventListener("error", ev => {
-            console.log({datachannel_error : ev});
+            console.log({ datachannel_error: ev });
         })
 
         this.createOffer(this.pc);
@@ -88,28 +107,6 @@ export class StreamController {
     handleConnectionStatus(setOnlineStatus) {
         this.pc.onconnectionstatechange = ev => {
             setOnlineStatus(this.pc.connectionState)
-            //switch (this.pc.connectionState) {
-            //    case "new":
-            //        setOnlineStatus("New");
-            //    case "checking":
-            //        setOnlineStatus("Connecting...");
-            //        break;
-            //    case "connected":
-            //        setOnlineStatus("Online");
-            //        break;
-            //    case "disconnected":
-            //        setOnlineStatus("Disconnecting...");
-            //        break;
-            //    case "closed":
-            //        setOnlineStatus("Offline");
-            //        break;
-            //    case "failed":
-            //        setOnlineStatus("Error");
-            //        break;
-            //    default:
-            //        setOnlineStatus("Unknown");
-            //        break;
-            //}
         }
     }
 
@@ -158,6 +155,9 @@ export class StreamController {
 
     onMessage(e) {
         let json = JSON.parse(instance.ab2str(e.data));
+        if(instance.onChatMessage ){
+            instance.onChatMessage(json)
+        }
         instance.videoContainer.json = json
         instance.videoContainer.ready = true;
     }
@@ -170,7 +170,6 @@ export class StreamController {
     async startMedia(pc) {
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-            console.log(document.getElementById("id_video"));
             document.getElementById("id_video").srcObject = stream;
             stream.getTracks().forEach(track => pc.addTrack(track, stream));
             instance.stream = stream
@@ -209,11 +208,13 @@ export class StreamController {
 
     async sendToServer(url, msg) {
         try {
+            const user = currentUser()
+            const id = parseInt(user.id)
             let response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain; charset=utf-8',
-                    'userid': 0
+                    'userid': id
                 },
                 body: msg
             })
@@ -267,6 +268,10 @@ export class StreamController {
         if (instance.stream) {
             instance.stream.getTracks().forEach(track => track.stop());
         }
+    }
+
+    sendChatMessage(message) {
+        this.sendChannel.send(JSON.stringify(message))
     }
 }
 
