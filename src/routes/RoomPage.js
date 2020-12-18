@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     video: {
         width: '100%',
         height: '100%',
-        maxHeight : 'calc(100vh - 132px)'
+        maxHeight: 'calc(100vh - 132px)'
         //border : "1px solid grey", 
         //borderRadius: "10px" 
     },
@@ -79,14 +79,14 @@ function RoomPage(params) {
     }
 
     let roomID = undefined
-    if(room) roomID = room.ID
+    if (room) roomID = room.ID
 
     return (
         <Box display="flex" height="100%" flexDirection="column">
             <MyAppBar title={room && room.Name} />
             <Box display="flex" flexGrow="1">
                 <Box flex="3" display="flex" alignItems="center">
-                    <video className={classes.video} id="id_video" autoPlay muted/>
+                    <video className={classes.video} id="id_video" autoPlay muted />
                 </Box>
                 <Box flex="1" className={classes.chat}>
                     <ChatView streamController={streamController} roomID={roomID}>
@@ -95,6 +95,7 @@ function RoomPage(params) {
                 </Box>
             </Box>
             <Toolbar className={classes.toolbar}>
+                <audio id="audioBox" autoplay controls></audio>
                 <Button variant="contained" color="primary"
                     onClick={onShareScreenClick}
                 >

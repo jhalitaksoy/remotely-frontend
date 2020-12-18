@@ -4,7 +4,7 @@ import { post } from '../service/NetworkService';
 //
 export function loginUser(user, callback) {
     post(`/user/login`, user).then(response => {
-        const userID = response.data    
+        const userID = response.data
         window.localStorage.setItem("userID", userID)
         callback()
     }).catch(error => {
@@ -43,4 +43,12 @@ export function currentUser() {
     if (userID) {
         return { id: userID }
     }
+}
+
+export const loginRedirect = {
+    afterLogin: undefined,
+    onGotoLogin: () => {
+        console.log("a");
+    }
+
 }

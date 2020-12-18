@@ -88,6 +88,7 @@ export class StreamController {
         this.pc.onicecandidate = this.handleICECandidate(id);
 
         this.pc.addTransceiver('video', { 'direction': 'recvonly' });
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
 
         let sendChannel = this.pc.createDataChannel(id)
@@ -111,10 +112,16 @@ export class StreamController {
     }
 
     handleTrack(event) {
-        let el = document.getElementById('id_video');
-        el.srcObject = event.streams[0]
-        el.autoplay = true
-        el.controls = true
+        if (event.streams[0].id == 'video') {
+            let el = document.getElementById('id_video');
+            el.srcObject = event.streams[0]
+            el.autoplay = true
+            el.controls = true
+        } else if (event.streams[0].id == 'audio') {
+            const audioBox = document.querySelector('audio#audioBox')
+            console.log({ audioBox });
+            audioBox.srcObject = event.streams[0];
+        }
     }
 
     instance() {
@@ -155,7 +162,7 @@ export class StreamController {
 
     onMessage(e) {
         let json = JSON.parse(instance.ab2str(e.data));
-        if(instance.onChatMessage ){
+        if (instance.onChatMessage) {
             instance.onChatMessage(json)
         }
         instance.videoContainer.json = json
@@ -169,10 +176,16 @@ export class StreamController {
 
     async startMedia(pc) {
         try {
-            const stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-            document.getElementById("id_video").srcObject = stream;
-            stream.getTracks().forEach(track => pc.addTrack(track, stream));
-            instance.stream = stream
+            const streamAudio = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false
+            })//.then(handleSuccess).catch(handleError);
+            streamAudio.getTracks().forEach(track => pc.addTrack(track, streamAudio));
+
+            const streamVideo = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+            document.getElementById("id_video").srcObject = streamVideo;
+            streamVideo.getTracks().forEach(track => pc.addTrack(track, streamVideo));
+            instance.stream = streamVideo
         }
         catch (e) {
             console.log(e);

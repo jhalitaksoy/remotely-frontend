@@ -24,6 +24,7 @@ export function joinRoom(id, callback) {
 export function listRooms(callback) {
     post(`/room/listRooms`, "")
     .then((response) => {
+        console.log(response);
         callback(response.data)
     }).catch((error) => {
         console.log({error})
