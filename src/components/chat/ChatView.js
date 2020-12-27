@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-const testData = [{
+/*const testData = [{
     ID: 0,
     user: {
         ID: 0,
@@ -33,7 +33,7 @@ const testData = [{
     },
     text: 'Hello hlt'
 }
-]
+]*/
 
 function ChatView(props) {
 
@@ -43,7 +43,7 @@ function ChatView(props) {
 
     const [chatLoadState, setChatLoadState] = useState("loading")
 
-    if (chatLoadState != 'loaded') {
+    if (chatLoadState !== 'loaded') {
         getChat(props.roomID, (data, err) => {
             if (err) {
                 setChatLoadState("error")
@@ -51,12 +51,11 @@ function ChatView(props) {
             }
             setChatLoadState("loaded")
             if(data)setMessages(data)
-            console.log("loaded");
         })
     }
 
     const onChatMessage = (message) => {
-        if (chatLoadState == "loaded")
+        if (chatLoadState === "loaded")
             setMessages([...messages, message])
     }
 

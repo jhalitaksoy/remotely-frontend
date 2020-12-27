@@ -1,9 +1,9 @@
 import React from 'react';
 import { Redirect } from "react-router-dom";
 import { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles'
+//import { makeStyles } from '@material-ui/core/styles'
 import IconButton from '@material-ui/core/IconButton';
-import { currentUser, logoutUser } from '../controller/UserController';
+import { currentUser } from '../controller/UserController';
 import { useHistory } from "react-router-dom";
 import { Box, List, ListItem, ListItemText, Grid, Paper, ListSubheader } from '@material-ui/core';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -16,20 +16,20 @@ import ShareIcon from '@material-ui/icons/Share';
 import { createRoom, listRooms } from '../controller/RoomControlker';
 import MyAppBar from '../components/MyAppBar';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-        flexGrow: 1,
-    },
-}));
+//const useStyles = makeStyles((theme) => ({
+//    root: {
+//        flexGrow: 1,
+//    },
+//    menuButton: {
+//        marginRight: theme.spacing(2),
+//    },
+//    title: {
+//        flexGrow: 1,
+//    },
+//}));
 
 function HomePage(props) {
-    const classes = useStyles()
+    //const classes = useStyles()
     const history = useHistory()
     const [rooms, setRooms] = useState(undefined)
     const [roomsLoadState, setRoomsLoadState] = useState("loading")
@@ -50,10 +50,10 @@ function HomePage(props) {
         return <Redirect to="/login" />
     }
 
-    const logoutClick = () => {
-        logoutUser()
-        history.replace("/login")
-    }
+    //const logoutClick = () => {
+    //    logoutUser()
+    //    history.replace("/login")
+    //}
 
     const onCreateRoom = () => {
         setRoomsLoadState("loading")
@@ -71,8 +71,10 @@ function HomePage(props) {
 
     let roomsUI = undefined
     if (roomsLoadState === 'loaded' && rooms) {
+        var i = -1;
         roomsUI = rooms.map((room) => {
-            return <ListItem onClick={(e) => onRoomSelected(room)} button>
+            i++;
+            return <ListItem key={i} onClick={(e) => onRoomSelected(room)} button>
                 <ListItemAvatar>
                     <Avatar>
                         <ImageIcon />

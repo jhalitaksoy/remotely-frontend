@@ -1,6 +1,3 @@
-// this code works the modern way
-"use strict";
-
 import { serverUrl } from "../service/NetworkService";
 import { currentUser } from "./UserController";
 
@@ -47,17 +44,28 @@ export class StreamController {
         })
         pc.oniceconnectionstatechange = this.handleICEConnectionStateChange;
         pc.addEventListener("icecandidateerror", (event) => {
-            console.log(event);
+            console.log("error " + event);
         });
         pc.addEventListener("error", (event) => {
             console.log({ err: event });
         });
+        pc.onnegotiationneeded = function () {
+            console.log("onnegotiationneeded")
+            //pc.createOffer().then(function (offer) {
+            //    return pc.setLocalDescription(offer);
+            //}).then(function () {
+            //    // Send the offer to the remote peer through the signaling server
+            //}).catch((err) => {
+            //    console.log(err)
+            //})
+        }
         return pc
     }
 
     publish() {
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
-
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        this.pc.ontrack = this.handleTrack;
         // todo : WTF
         var id = 0
 
@@ -65,7 +73,6 @@ export class StreamController {
         sendChannel.onclose = () => console.log('sendChannel has closed')
         sendChannel.onopen = () => {
             this.sendChannel = sendChannel
-            console.log('sendChannel has opened');
         }
         sendChannel.onmessage = this.onMessage
         sendChannel.addEventListener("error", ev => {
@@ -80,7 +87,7 @@ export class StreamController {
             .catch(log)
     }
 
-    join() {
+    async join() {
         let timestamp = Date.now();
         let rnd = Math.floor(Math.random() * 1000000000);
         let id = "Client:" + timestamp.toString() + ":" + rnd.toString()
@@ -92,17 +99,18 @@ export class StreamController {
         this.pc.ontrack = this.handleTrack;
 
         let sendChannel = this.pc.createDataChannel(id)
-        sendChannel.onclose = () => console.log('sendChannel has closed')
+        //sendChannel.onclose = () => console.log('sendChannel has closed')
         sendChannel.onopen = () => {
             this.sendChannel = sendChannel
-            console.log('sendChannel has opened');
         }
         sendChannel.onmessage = this.onMessage
         sendChannel.addEventListener("error", ev => {
             console.log({ datachannel_error: ev });
         })
 
-        this.createOffer(this.pc);
+        await this.createAudioStream(this.pc)
+
+        this.createOffer(this.pc)
     }
 
     handleConnectionStatus(setOnlineStatus) {
@@ -112,20 +120,19 @@ export class StreamController {
     }
 
     handleTrack(event) {
-        if (event.streams[0].id == 'video') {
+        if (event.streams[0].id === 'video') {
             let el = document.getElementById('id_video');
             el.srcObject = event.streams[0]
             el.autoplay = true
             el.controls = true
-        } else if (event.streams[0].id == 'audio') {
+        } else if (event.streams[0].id === 'audio') {
             const audioBox = document.querySelector('audio#audioBox')
-            console.log({ audioBox });
+            console.log("Received audio track");
             audioBox.srcObject = event.streams[0];
         }
     }
 
     instance() {
-        console.log({ canvas: this });
         return this;
     }
 
@@ -160,13 +167,20 @@ export class StreamController {
         requestAnimationFrame(updateCanvas);
     }
 
-    onMessage(e) {
+    async onMessage(e) {
         let json = JSON.parse(instance.ab2str(e.data));
         if (instance.onChatMessage) {
             instance.onChatMessage(json)
         }
         instance.videoContainer.json = json
         instance.videoContainer.ready = true;
+
+        //let sdp = await instance.sendToServer(serverUrl() + "/stream2/sdp/" + instance.roomid, "")
+        //console.log({ sdp })
+        //if (sdp) {
+        //    await instance.pc.setRemoteDescription(new RTCSessionDescription(sdp))
+        //}
+
     }
 
     //Convert object array buffer to string 
@@ -174,13 +188,26 @@ export class StreamController {
         return String.fromCharCode.apply(null, new Uint8Array(buf));
     }
 
+    async createAudioStream(pc) {
+        const streamAudio = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: false
+        })
+        streamAudio.getTracks().forEach(track => pc.addTrack(track, streamAudio))
+        this.streamAudio = streamAudio;
+    }
+
+    pauseAudioSend() {
+        this.streamAudio.getTracks().forEach(track => track.enabled = false)
+    }
+
+    resumeAudioSend() {
+        this.streamAudio.getTracks().forEach(track => track.enabled = true)
+    }
+
     async startMedia(pc) {
         try {
-            const streamAudio = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: false
-            })//.then(handleSuccess).catch(handleError);
-            streamAudio.getTracks().forEach(track => pc.addTrack(track, streamAudio));
+            await this.createAudioStream(pc)
 
             const streamVideo = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
             document.getElementById("id_video").srcObject = streamVideo;
@@ -201,15 +228,16 @@ export class StreamController {
     handleICECandidate(username) {
         return async function (event) {
             try {
-                log("ICECandidate: " + event.candidate)
-                if (event.candidate === null) {
+                //log("ICECandidate: " + event.candidate)
+                if (event.candidate === null && !instance.sdpSended) {
+                    instance.sdpSended = true;
                     //document.getElementById('finalLocalSessionDescription').value = JSON.stringify(pc.localDescription)
                     let msg = {
                         Name: username,
                         SD: instance.pc.localDescription
                     };
                     let sdp = await instance.sendToServer(serverUrl() + "/stream/sdp/" + instance.roomid, JSON.stringify(msg))
-                    console.log(sdp)
+                    console.log({ sdp })
                     await instance.pc.setRemoteDescription(new RTCSessionDescription(sdp))
                 }
             }
@@ -234,7 +262,7 @@ export class StreamController {
             // Verify HTTP-status is 200-299
             let json
             if (response.ok) {
-                if (response.headers.get('Content-Type') == "application/json; charset=utf-8") {
+                if (response.headers.get('Content-Type') === "application/json; charset=utf-8") {
                     json = await response.json();
                 } else {
                     throw new Error("Content-Type expected `application/json; charset=utf-8` but got " + response.headers.get('Content-Type'))

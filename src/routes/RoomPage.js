@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardHeader, Grid, Paper, Toolbar, Typography } from '@material-ui/core';
+import { Box, Button, Toolbar } from '@material-ui/core';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MyAppBar from '../components/MyAppBar';
@@ -40,12 +40,13 @@ function RoomPage(params) {
     const classes = useStyles()
 
     const [room, setRoom] = useState(undefined)
-    const [connectionState, setConnectionState] = useState("empty")
+    //const [connectionState, setConnectionState] = useState("empty")
     const [streamController, setStreamController] = useState(undefined)
     const [roomLoadState, setRoomLoadState] = useState("loading")
+    const [micState, setMicState] = useState(true)
 
     useEffect(() => {
-        if (roomLoadState != "loaded") {
+        if (roomLoadState !== "loaded") {
             getRoom(id, (res, err) => {
                 if (err) {
                     setRoomLoadState("error")
@@ -61,7 +62,7 @@ function RoomPage(params) {
     })
 
     const onStatusChange = (text) => {
-        setConnectionState(text)
+        //setConnectionState(text)
     }
 
     const onShareScreenClick = (e) => {
@@ -70,12 +71,16 @@ function RoomPage(params) {
         streamController.publish()
     }
 
-    if (!room) {
-        return <div>Not Found</div>
+    const onOpenAudioClick = (e) => {
+        setMicState(!micState)
+        if (micState)
+            streamController.pauseAudioSend();
+        else
+            streamController.resumeAudioSend();
     }
 
-    const renderShareScreen = () => {
-
+    if (!room) {
+        return <div>Not Found</div>
     }
 
     let roomID = undefined
@@ -95,7 +100,7 @@ function RoomPage(params) {
                 </Box>
             </Box>
             <Toolbar className={classes.toolbar}>
-                <audio id="audioBox" autoplay controls></audio>
+                <audio id="audioBox" autoPlay controls></audio>
                 <Button variant="contained" color="primary"
                     onClick={onShareScreenClick}
                 >
@@ -105,8 +110,8 @@ function RoomPage(params) {
                     }
                 </Button>
                 <Box width="10px" />
-                <Button variant="contained" color="primary">
-                    Open Microphone
+                <Button variant="contained" color="primary" onClick={onOpenAudioClick}>
+                    {micState ? "Close Microphone" : "Open Microphone"}
                 </Button>
             </Toolbar>
             {/* <Grid justify="center" container>

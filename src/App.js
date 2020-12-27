@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import LoginPage from './routes/LoginPage';
 import {
   BrowserRouter,
   Switch,
   Route,
-  useHistory,
   withRouter,
 } from "react-router-dom";
 import HomePage from './routes/HomePage';
@@ -16,15 +15,13 @@ import { loginRedirect } from './controller/UserController';
 function App() {
   //const history = useHistory();
 
-  const [gotoLogin, setGotoLogin] = useState(false)
+  //const [gotoLogin, setGotoLogin] = useState(false)
 
   withRouter(({ history }) => {
     loginRedirect.onGotoLogin = () => {
       history.push("/login")
     }
   })
-
-
 
   return (
     <BrowserRouter>

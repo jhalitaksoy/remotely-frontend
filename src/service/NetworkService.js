@@ -4,8 +4,9 @@ const { default: Axios } = require("axios");
 
 export function serverUrl() {
     //return 'http://192.168.43.2:80' 
-    return 'http://127.0.0.1:8080'
+    //return 'http://127.0.0.1:8080'
     //return 'https://34.107.125.219'
+    return 'https://46.101.134.10'
 }
 
 function headers() {
@@ -21,13 +22,13 @@ function headers() {
 //
 export function post(route, data) {
     return new Promise(function(resolve, reject) {
-        var post = Axios.post(serverUrl() + route, data, {
+        Axios.post(serverUrl() + route, data, {
             headers: headers()
         }).then((response)=> {
             resolve(response)
         }).catch((error)=>{
             if (error.response) {
-                if(error.response.status == 401){
+                if(error.response.status === 401){
                     loginRedirect.onGotoLogin()
                 }else{
                     reject(error)
