@@ -62,7 +62,7 @@ export class StreamController {
         return pc
     }
 
-    publish() {
+    async publish(){
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
         this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
@@ -78,13 +78,13 @@ export class StreamController {
         sendChannel.addEventListener("error", ev => {
             console.log({ datachannel_error: ev });
         })
-
-        // Start acquisition of media
-        this.startMedia(this.pc)
-            .then(function () {
-                return instance.createOffer()
-            })
-            .catch(log)
+        log("publish")
+        try {
+            await this.startMedia(this.pc)
+            return instance.createOffer()
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     async join() {
@@ -228,8 +228,8 @@ export class StreamController {
     handleICECandidate(username) {
         return async function (event) {
             try {
-                //log("ICECandidate: " + event.candidate)
-                if (event.candidate === null && !instance.sdpSended) {
+                log("ICECandidate: " + event.candidate)
+                if (event.candidate === null/* && !instance.sdpSended*/) {
                     instance.sdpSended = true;
                     //document.getElementById('finalLocalSessionDescription').value = JSON.stringify(pc.localDescription)
                     let msg = {
