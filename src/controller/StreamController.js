@@ -1,5 +1,7 @@
 import { serverUrl } from "../service/NetworkService";
+import { convertFromBytes } from "../util/datachannel_util";
 import { currentUser } from "./UserController";
+import {onMessage} from "./ChatController"
 
 var mediaConstraints = {
     audio: false, // We dont want an audio track
@@ -14,6 +16,13 @@ var mediaConstraints = {
 // document.getElementById("id_v").style="visibility:hidden"; 
 // object to hold video and associated info
 
+export const messageTypes = {
+    chat : 0
+}
+
+Object.freeze(messageTypes)
+
+export let dataChannel = {}
 
 let instance;
 
@@ -72,7 +81,7 @@ export class StreamController {
         let sendChannel = this.pc.createDataChannel(id)
         sendChannel.onclose = () => console.log('sendChannel has closed')
         sendChannel.onopen = () => {
-            this.sendChannel = sendChannel
+            this.dataChannel = sendChannel
         }
         sendChannel.onmessage = this.onMessage
         sendChannel.addEventListener("error", ev => {
@@ -102,6 +111,7 @@ export class StreamController {
         //sendChannel.onclose = () => console.log('sendChannel has closed')
         sendChannel.onopen = () => {
             this.sendChannel = sendChannel
+            dataChannel = sendChannel
         }
         sendChannel.onmessage = this.onMessage
         sendChannel.addEventListener("error", ev => {
@@ -168,24 +178,16 @@ export class StreamController {
     }
 
     async onMessage(e) {
-        let json = JSON.parse(instance.ab2str(e.data));
-        if (instance.onChatMessage) {
-            instance.onChatMessage(json)
+        
+        const {type, message} = convertFromBytes(e.data)
+
+        if(type === messageTypes.chat){
+            if(onMessage){
+                onMessage(message)
+            }
+        }else{
+            log("Unknown message type : " + type)
         }
-        instance.videoContainer.json = json
-        instance.videoContainer.ready = true;
-
-        //let sdp = await instance.sendToServer(serverUrl() + "/stream2/sdp/" + instance.roomid, "")
-        //console.log({ sdp })
-        //if (sdp) {
-        //    await instance.pc.setRemoteDescription(new RTCSessionDescription(sdp))
-        //}
-
-    }
-
-    //Convert object array buffer to string 
-    ab2str(buf) {
-        return String.fromCharCode.apply(null, new Uint8Array(buf));
     }
 
     async createAudioStream(pc) {
@@ -310,10 +312,6 @@ export class StreamController {
             instance.stream.getTracks().forEach(track => track.stop());
         }
     }
-
-    sendChatMessage(message) {
-        this.sendChannel.send(JSON.stringify(message))
-    }
 }
 
 class HttpError extends Error {
@@ -329,9 +327,9 @@ var log = msg => {
     //document.getElementById('logs').innerHTML += msg + '<br>'
 }
 
-window.addEventListener('unhandledrejection', function (event) {
+/*window.addEventListener('unhandledrejection', function (event) {
     // the event object has two special properties:
     // alert(event.promise); // [object Promise] - the promise that generated the error
     // alert(event.reason); // Error: Whoops! - the unhandled error object
     alert("Event: " + event.promise + ". Reason: " + event.reason);
-});
+});*/

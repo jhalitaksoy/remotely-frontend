@@ -2,8 +2,8 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import MessageList from './MessageList';
 import MessageSender from './MessageSender';
-import { useState } from 'react';
-import { getChat } from '../../controller/ChatController';
+import { useState, useRef , useEffect} from 'react';
+import { getChat, sendChatMessage, setOnMessageCallback } from '../../controller/ChatController';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -41,30 +41,40 @@ function ChatView(props) {
 
     const [messages, setMessages] = useState([])
 
-    const [chatLoadState, setChatLoadState] = useState("loading")
+    const [chatLoadState, setChatLoadState] = useState("init")
+    const messagesStateRef = useRef(messages);
+    useEffect(
+      () => {
+        messagesStateRef.current = messages;
+      },
+      [messages],
+    );
 
-    if (chatLoadState !== 'loaded') {
+    if (chatLoadState === 'init') {
+        setChatLoadState("loading")
         getChat(props.roomID, (data, err) => {
             if (err) {
                 setChatLoadState("error")
                 return
             }
             setChatLoadState("loaded")
-            if(data)setMessages(data)
+            setOnMessageCallback(onChatMessage)
+            if (data) setMessages(data)
         })
     }
 
+    const addNewMessage = (message) => {
+        const oldMessages = messagesStateRef.current
+        setMessages([...oldMessages, message])
+    }
+
     const onChatMessage = (message) => {
-        if (chatLoadState === "loaded")
-            setMessages([...messages, message])
+        addNewMessage(message)
     }
 
     const onSendMessage = (message) => {
-        props.streamController.sendChatMessage(message)
+        sendChatMessage(message)
     }
-
-    if (props.streamController)
-        props.streamController.onChatMessage = onChatMessage;
 
     return (
         <div className={classes.container}>

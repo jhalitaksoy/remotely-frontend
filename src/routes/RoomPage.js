@@ -50,6 +50,7 @@ function RoomPage(params) {
             getRoom(id, (res, err) => {
                 if (err) {
                     setRoomLoadState("error")
+                    return
                 }
                 setRoomLoadState("loaded")
                 setRoom(res)
@@ -79,8 +80,12 @@ function RoomPage(params) {
             streamController.resumeAudioSend();
     }
 
-    if (!room) {
+    if (roomLoadState == "loading") {
+        return <div>Loading</div>
+    } else if(roomLoadState == "error"){
         return <div>Not Found</div>
+    } else if( !room ){
+        return <div>Loading</div>
     }
 
     let roomID = undefined
@@ -94,9 +99,7 @@ function RoomPage(params) {
                     <video className={classes.video} id="id_video" autoPlay muted />
                 </Box>
                 <Box flex="1" className={classes.chat}>
-                    <ChatView streamController={streamController} roomID={roomID}>
-
-                    </ChatView>
+                    <ChatView roomID={roomID}/>
                 </Box>
             </Box>
             <Toolbar className={classes.toolbar}>
@@ -114,55 +117,6 @@ function RoomPage(params) {
                     {micState ? "Close Microphone" : "Open Microphone"}
                 </Button>
             </Toolbar>
-            {/* <Grid justify="center" container>
-                <Grid item>
-                    <Grid container spacing={2} justify="center">
-                        <Grid item>
-                            <Button variant="contained" color="secondary"
-                                onClick={(e) => {
-                                    streamController.start(room.ID, onStatusChange)
-                                    streamController.publish()
-                                }} >Publish</Button>
-                        </Grid>
-
-                        <Grid item>
-                            <Button variant="contained" color="secondary"
-                                onClick={(e) => {
-                                    streamController.start(room.ID, onStatusChange)
-                                    streamController.join()
-                                }} >Join</Button>
-                        </Grid>
-
-                        <Grid item>
-                            <Button variant="contained" color="secondary"
-                                onClick={(e) => {
-                                    streamController.cancel(room.ID)
-                                }} >Cancel</Button>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item xs={12} justify="center" alignItems="center">
-                    <Box display="flex" alignItems="center" justifyContent="center"
-                        margin="10px">
-                        <Typography variant="subtitle2">{connectionState}</Typography>
-                    </Box>
-                </Grid>
-                <Grid item xs={12}>
-                    <Grid container justify="center" direction="column" alignItems="center">
-                        <Grid item >
-                            <video style={{ border: "1px solid grey", borderRadius: "10px" }} id="id_video"
-                                width="683px" height="369px"
-                                autoPlay muted>
-
-                            </video>
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-                <div id="stats-box">
-
-                </div>
-            </Grid> */}
         </Box>
     )
 }
