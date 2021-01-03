@@ -6,10 +6,16 @@ import { getRoom } from '../controller/RoomControlker';
 import { StreamController } from '../controller/StreamController';
 import { makeStyles } from '@material-ui/core/styles'
 import ChatView from '../components/chat/ChatView';
+import MicIcon from '@material-ui/icons/Mic';
+import MicOffIcon from '@material-ui/icons/MicOff';
+import ScreenShareSharpIcon from '@material-ui/icons/ScreenShareSharp';
 
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
+    },
+    roomContainer: {
+        display: "flex",
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -80,45 +86,53 @@ function RoomPage(params) {
             streamController.resumeAudioSend();
     }
 
+    let content;
+
     if (roomLoadState == "loading") {
-        return <div>Loading</div>
-    } else if(roomLoadState == "error"){
-        return <div>Not Found</div>
-    } else if( !room ){
-        return <div>Loading</div>
+        content =
+            <Box display="flex" height="100%" flexDirection="column">
+                <div>Loading</div>
+            </Box>
+    } else if (roomLoadState == "error") {
+        content =
+            <Box display="flex" height="100%" flexDirection="column">
+                <div>Not Found</div>
+            </Box>
+    } else if (!room) {
+        content =
+            <Box display="flex" height="100%" flexDirection="column">
+                <div>Not Found</div>
+            </Box>
+    } else {
+        let roomID = undefined
+        if (room) roomID = room.ID
+        content =
+            <Box display="flex" height="100%" flexDirection="column">
+                <MyAppBar title={room && room.Name} />
+                <Box display="flex" flexGrow="1">
+                    <Box flex="3" display="flex" alignItems="center">
+                        <video className={classes.video} id="id_video" autoPlay muted />
+                    </Box>
+                    <Box flex="1" className={classes.chat}>
+                        <ChatView roomID={roomID} />
+                    </Box>
+                </Box>
+                <Toolbar className={classes.toolbar}>
+                    <audio id="audioBox" autoPlay controls></audio>
+                    <Button variant="contained" color="primary"
+                        onClick={onShareScreenClick}>
+                        <ScreenShareSharpIcon/>
+                        Screen Share
+                    </Button>
+                    <Box width="10px" />
+                    <Button variant="contained" color="primary" onClick={onOpenAudioClick}>
+                        {micState ? <MicIcon/> : <MicOffIcon/>}
+                    </Button>
+                </Toolbar>
+            </Box>
     }
 
-    let roomID = undefined
-    if (room) roomID = room.ID
-
-    return (
-        <Box display="flex" height="100%" flexDirection="column">
-            <MyAppBar title={room && room.Name} />
-            <Box display="flex" flexGrow="1">
-                <Box flex="3" display="flex" alignItems="center">
-                    <video className={classes.video} id="id_video" autoPlay muted />
-                </Box>
-                <Box flex="1" className={classes.chat}>
-                    <ChatView roomID={roomID}/>
-                </Box>
-            </Box>
-            <Toolbar className={classes.toolbar}>
-                <audio id="audioBox" autoPlay controls></audio>
-                <Button variant="contained" color="primary"
-                    onClick={onShareScreenClick}
-                >
-                    Share Screen
-                    {
-
-                    }
-                </Button>
-                <Box width="10px" />
-                <Button variant="contained" color="primary" onClick={onOpenAudioClick}>
-                    {micState ? "Close Microphone" : "Open Microphone"}
-                </Button>
-            </Toolbar>
-        </Box>
-    )
+    return (content)
 }
 
 export default RoomPage

@@ -1,23 +1,15 @@
 import { serverUrl } from "../service/NetworkService";
 import { convertFromBytes } from "../util/datachannel_util";
 import { currentUser } from "./UserController";
-import {onMessage} from "./ChatController"
+import { onMessage } from "./ChatController"
 
 var mediaConstraints = {
     audio: false, // We dont want an audio track
     video: true // ...and we want a video track
 };
 
-// Get the canvas element using the DOM
-// let video = document.createElement('video');
-// video.id="id_v";
-// video.autoplay = true;
-// document.body.appendChild(video);
-// document.getElementById("id_v").style="visibility:hidden"; 
-// object to hold video and associated info
-
 export const messageTypes = {
-    chat : 0
+    chat: 0
 }
 
 Object.freeze(messageTypes)
@@ -31,10 +23,7 @@ export class StreamController {
         this.pc = this.createPC();
         this.handleConnectionStatus(setOnlineStatus)
         this.canvas = document.getElementById('id_canvas');
-        //this.ctx = this.canvas.getContext('2d')
         this.video = document.getElementById("id_video");
-        // set the event to the play function that can be found below
-        //this.video.oncanplay = this.readyToPlayVideo;
         this.videoContainer = {
             video: this.video,
             ready: false,
@@ -60,18 +49,11 @@ export class StreamController {
         });
         pc.onnegotiationneeded = function () {
             console.log("onnegotiationneeded")
-            //pc.createOffer().then(function (offer) {
-            //    return pc.setLocalDescription(offer);
-            //}).then(function () {
-            //    // Send the offer to the remote peer through the signaling server
-            //}).catch((err) => {
-            //    console.log(err)
-            //})
         }
         return pc
     }
 
-    async publish(){
+    async publish() {
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
         this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
@@ -87,7 +69,6 @@ export class StreamController {
         sendChannel.addEventListener("error", ev => {
             console.log({ datachannel_error: ev });
         })
-        log("publish")
         try {
             await this.startMedia(this.pc)
             return instance.createOffer()
@@ -108,7 +89,7 @@ export class StreamController {
         this.pc.ontrack = this.handleTrack;
 
         let sendChannel = this.pc.createDataChannel(id)
-        //sendChannel.onclose = () => console.log('sendChannel has closed')
+        sendChannel.onclose = () => console.log('sendChannel has closed')
         sendChannel.onopen = () => {
             this.sendChannel = sendChannel
             dataChannel = sendChannel
@@ -130,9 +111,10 @@ export class StreamController {
     }
 
     handleTrack(event) {
-        if (event.streams[0].id === 'video') {
+        var mediaStreamTrack = event.streams[0]
+        if (mediaStreamTrack.id === 'video') {
             let el = document.getElementById('id_video');
-            el.srcObject = event.streams[0]
+            el.srcObject = mediaStreamTrack
             el.autoplay = true
             el.controls = true
         } else if (event.streams[0].id === 'audio') {
@@ -178,14 +160,14 @@ export class StreamController {
     }
 
     async onMessage(e) {
-        
-        const {type, message} = convertFromBytes(e.data)
 
-        if(type === messageTypes.chat){
-            if(onMessage){
+        const { type, message } = convertFromBytes(e.data)
+
+        if (type === messageTypes.chat) {
+            if (onMessage) {
                 onMessage(message)
             }
-        }else{
+        } else {
             log("Unknown message type : " + type)
         }
     }
@@ -326,10 +308,3 @@ var log = msg => {
     console.log(msg);
     //document.getElementById('logs').innerHTML += msg + '<br>'
 }
-
-/*window.addEventListener('unhandledrejection', function (event) {
-    // the event object has two special properties:
-    // alert(event.promise); // [object Promise] - the promise that generated the error
-    // alert(event.reason); // Error: Whoops! - the unhandled error object
-    alert("Event: " + event.promise + ". Reason: " + event.reason);
-});*/

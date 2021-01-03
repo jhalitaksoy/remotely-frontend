@@ -3,12 +3,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, TextField } from '@material-ui/core';
 import { useState } from 'react';
 import { currentUser } from '../../controller/UserController';
+import SendIcon from '@material-ui/icons/Send';
 
 const useStyles = makeStyles((thme) => ({
     messageSender: {
         display: 'flex',
-        padding : '10px',
-        background : 'white',
+        padding: '10px',
+        background: 'white',
     }
 }))
 
@@ -18,6 +19,7 @@ const MessageSender = (props) => {
     const onMessageChange = (event) => {
         setMessage(event.target.value)
     }
+
     const onSendMessage = () => {
         const user = currentUser()
         const newMessage = {
@@ -28,15 +30,21 @@ const MessageSender = (props) => {
             text: message,
         }
         props.onSendMessage(newMessage)
+
+        setMessage("")
     }
     return (<div className={classes.messageSender}>
-        <TextField variant="outlined" onChange={onMessageChange}></TextField>
+        <TextField
+            //placeholder="Mesaj yazın."
+            value={message}
+            onChange={onMessageChange}
+            size="small" variant="outlined"></TextField>
         <Button
             style={{ marginLeft: '10px' }}
             variant="contained"
-            color="primary"
+            color="secondary"
             onClick={onSendMessage}
-        >Send</Button>
+        ><SendIcon/></Button>
     </div>);
 }
 
