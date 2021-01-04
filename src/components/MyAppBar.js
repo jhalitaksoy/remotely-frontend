@@ -8,6 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { useHistory } from "react-router-dom";
 import { makeStyles } from '@material-ui/core/styles';
 import { logoutUser } from '../controller/UserController';
+import AccountCircleOutlined from '@material-ui/icons/AccountCircleOutlined';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -18,6 +19,10 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         flexGrow: 1,
+        textAlign: 'center',
+    },
+    appbar : {
+        borderBottom : '1px solid #dcd3d3',
     },
 }));
 
@@ -30,15 +35,15 @@ function MyAppBar(props) {
     }
 
     return (
-        <AppBar position="static">
-            <Toolbar>
+        <AppBar className={classes.appbar} position="static" elevation={0} color="white">
+            <Toolbar variant="dense">
                 <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
                     <MenuIcon />
                 </IconButton>
                 <Typography variant="h6" className={classes.title}>
                     {props.title}
             </Typography>
-                <Button color="inherit" onClick={logoutClick}>Logout</Button>
+                <Button color="inherit" onClick={logoutClick}><AccountCircleOutlined/></Button>
             </Toolbar>
         </AppBar>
     )

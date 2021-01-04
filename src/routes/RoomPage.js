@@ -28,7 +28,8 @@ const useStyles = makeStyles((theme) => ({
     video: {
         width: '100%',
         height: '100%',
-        maxHeight: 'calc(100vh - 132px)'
+        maxHeight: 'calc(100vh - 132px)',
+        backgroundColor: 'white !important',
         //border : "1px solid grey", 
         //borderRadius: "10px" 
     },
@@ -67,6 +68,22 @@ function RoomPage(params) {
             })
         }
     })
+
+    // Select elements here
+    const video = document.getElementById('id_video');
+    if (video) {
+        const videoControls = document.getElementById('video-controls');
+
+        const videoWorks = !!document.createElement('video').canPlayType;
+        if (videoWorks) {
+            video.controls = false;
+            if(videoControls    ){
+                videoControls.classList.remove('hidden');
+            }
+        }
+    }
+
+
 
     const onStatusChange = (text) => {
         //setConnectionState(text)
@@ -111,7 +128,7 @@ function RoomPage(params) {
                 <MyAppBar title={room && room.Name} />
                 <Box display="flex" flexGrow="1">
                     <Box flex="3" display="flex" alignItems="center">
-                        <video className={classes.video} id="id_video" autoPlay muted />
+                        <video preload="none" poster="none" controls={false} className={classes.video} id="id_video" autoPlay muted />
                     </Box>
                     <Box flex="1" className={classes.chat}>
                         <ChatView roomID={roomID} />
@@ -121,12 +138,12 @@ function RoomPage(params) {
                     <audio id="audioBox" autoPlay controls></audio>
                     <Button variant="contained" color="primary"
                         onClick={onShareScreenClick}>
-                        <ScreenShareSharpIcon/>
+                        <ScreenShareSharpIcon />
                         Screen Share
                     </Button>
                     <Box width="10px" />
                     <Button variant="contained" color="primary" onClick={onOpenAudioClick}>
-                        {micState ? <MicIcon/> : <MicOffIcon/>}
+                        {micState ? <MicIcon /> : <MicOffIcon />}
                     </Button>
                 </Toolbar>
             </Box>
