@@ -6,9 +6,11 @@ const useStyles = makeStyles((theme) => (
     {
         messageList : {
             display : 'flex',
-            width : "100%",
             flexDirection : 'column',
             flexGrow : '1',
+            alignSelf : 'stretch',
+            padding : '0px 20px 10px 10px',
+            
             //alignItems : 'center',
         }
     }

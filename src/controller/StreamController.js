@@ -9,7 +9,11 @@ var mediaConstraints = {
 };
 
 export const messageTypes = {
-    chat: 0
+    chat: 0,
+    surveyCreate: 1,
+    surveyVote: 2,
+    surveyUpdate: 3,
+    surveyEnd: 4,
 }
 
 Object.freeze(messageTypes)
@@ -65,7 +69,7 @@ export class StreamController {
         sendChannel.onopen = () => {
             this.dataChannel = sendChannel
         }
-        sendChannel.onmessage = this.onMessage
+        sendChannel.onmessage = this.onDataChannelMessage
         sendChannel.addEventListener("error", ev => {
             console.log({ datachannel_error: ev });
         })
@@ -94,7 +98,7 @@ export class StreamController {
             this.sendChannel = sendChannel
             dataChannel = sendChannel
         }
-        sendChannel.onmessage = this.onMessage
+        sendChannel.onmessage = this.onDataChannelMessage
         sendChannel.addEventListener("error", ev => {
             console.log({ datachannel_error: ev });
         })
@@ -108,6 +112,11 @@ export class StreamController {
         this.pc.onconnectionstatechange = ev => {
             setOnlineStatus(this.pc.connectionState)
         }
+    }
+
+    onDataChannelMessage(e){
+        const { type, message } = convertFromBytes(e.data)
+        onMessage(type, message)
     }
 
     handleTrack(event) {
@@ -157,19 +166,6 @@ export class StreamController {
             requestAnimationFrame(updateCanvas);
         }
         requestAnimationFrame(updateCanvas);
-    }
-
-    async onMessage(e) {
-
-        const { type, message } = convertFromBytes(e.data)
-
-        if (type === messageTypes.chat) {
-            if (onMessage) {
-                onMessage(message)
-            }
-        } else {
-            log("Unknown message type : " + type)
-        }
     }
 
     async createAudioStream(pc) {

@@ -35,13 +35,13 @@ const MessageSender = (props) => {
     }
     return (<div className={classes.messageSender}>
         <TextField
-            //placeholder="Mesaj yazın."
+            placeholder="Type Message"
             value={message}
             onChange={onMessageChange}
             size="small" variant="outlined"></TextField>
         <Button
             style={{ marginLeft: '10px' }}
-            variant="contained"
+            variant="outlined"
             color="secondary"
             onClick={onSendMessage}
         ><SendIcon/></Button>
