@@ -45,6 +45,8 @@ export function currentUser() {
     }
 }
 
+window.currentUser = currentUser;
+
 export const loginRedirect = {
     afterLogin: undefined,
     onGotoLogin: () => {

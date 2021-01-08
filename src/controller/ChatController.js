@@ -29,8 +29,11 @@ export function onMessage(type, message) {
         onChatMessage(message)
     } else if (type === messageTypes.surveyCreate) {
         onSurveyCreateMessage(message)
-    }
-    else {
+    } else if (type === messageTypes.surveyUpdate) {
+        onSurveyUpdateMessage(message)
+    } else if (type === messageTypes.surveyEnd) {
+        onSurveyEndMessage(message)
+    } else {
         console.log("Unknown message type : " + type)
     }
 }
@@ -57,5 +60,38 @@ function onSurveyCreateMessage(message) {
     console.log("New Survey Create Message : " + message)
     if (onSurveyCreateMessageCallback) {
         onSurveyCreateMessageCallback(json)
+    }
+}
+
+export function voteSurvey(surveyID, optionID) {
+    const vote = {
+        "surveyID": surveyID,
+        "optionID": optionID
+    }
+    dataChannel.send(convertToBytes(messageTypes.surveyVote, JSON.stringify(vote)))
+}
+
+export let onSurveyUpdateMessageCallback = undefined
+
+export function setSurveyUpdateMessageCallback(callback) { onSurveyUpdateMessageCallback = callback }
+
+function onSurveyUpdateMessage(message) {
+    let json = JSON.parse(message);
+    console.log("New Survey Update. Message : " + message)
+    if (onSurveyUpdateMessageCallback) {
+        onSurveyUpdateMessageCallback(json)
+    }
+}
+
+export let onSurveyEndMessageCallback = undefined
+
+export function setSurveyEndMessageCallback(callback) { onSurveyEndMessageCallback = callback }
+
+function onSurveyEndMessage(message) {
+    let json = JSON.parse(message);
+    console.log("New Survey End. Message : " + message)
+    
+    if (onSurveyEndMessageCallback) {
+        onSurveyEndMessageCallback(json.surveyID)
     }
 }
