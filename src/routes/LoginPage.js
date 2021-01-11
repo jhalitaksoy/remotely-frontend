@@ -1,7 +1,7 @@
 import { Box, Button, Card, TextField, Typography } from '@material-ui/core';
 import React from 'react';
 import { useState } from 'react';
-import { loginUser } from '../controller/UserController';
+import { loginUser, registerUser } from '../controller/UserController';
 import { useHistory } from "react-router-dom";
 
 function LoginPage(props) {
@@ -17,18 +17,35 @@ function LoginPage(props) {
             setLoginError("User name cannot be blank!")
             return
         }
-        if (!userPass) {
+        /*if (!userPass) {
             setLoginError("User password cannot be blank!")
             return
         }
         loginUser({
             Name: userName,
-            Password: userPass
+            Password: "asdfg"
         }, (error) => {
             if (error) {
                 setLoginError(error)
             } else {
                 history.replace("/")
+            }
+        })*/
+        const user = {
+            Name: userName,
+            Password: "asdfg"
+        }
+        registerUser(user, (error) => {
+            if (error) {
+                setLoginError(error)
+            } else {
+                loginUser(user, (error) => {
+                    if (error) {
+                        history.replace("/login")
+                    } else {
+                        history.replace("/")
+                    }
+                })
             }
         })
     }
@@ -68,13 +85,14 @@ function LoginPage(props) {
                         </Box>
                         <Box style={{ padding: '5px 0px' }}>
                             <TextField
+                                disabled={true}
                                 label="Password"
                                 type="password"
                                 variant="outlined"
                                 onChange={e => setUserPass(e.target.value)} />
                         </Box>
                         <Box display="flex" justifyContent="space-between" alignSelf="stretch" marginTop="10px">
-                            <Button color="primary" onClick={gotoRegister}>
+                            <Button disabled={true} color="primary" onClick={gotoRegister}>
                                 Register
                         </Button>
                             <Button variant="contained" color="primary" onClick={onLoginClick}>
