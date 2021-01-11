@@ -67,7 +67,8 @@ export class StreamController {
         let sendChannel = this.pc.createDataChannel(id)
         sendChannel.onclose = () => console.log('sendChannel has closed')
         sendChannel.onopen = () => {
-            this.dataChannel = sendChannel
+            this.sendChannel = sendChannel
+            dataChannel = sendChannel
         }
         sendChannel.onmessage = this.onDataChannelMessage
         sendChannel.addEventListener("error", ev => {
