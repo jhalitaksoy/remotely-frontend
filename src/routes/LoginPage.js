@@ -36,7 +36,7 @@ function LoginPage(props) {
             Password: "asdfg"
         }
         registerUser(user, (error) => {
-            if (error) {
+            if (error && error !== "User name already using :(. Try new one.") {
                 setLoginError(error)
             } else {
                 loginUser(user, (error) => {
