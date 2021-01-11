@@ -60,8 +60,9 @@ function HomePage(props) {
         const name = window.prompt("Room Name", "Room1")
         createRoom({ Name: name }, (res, err) => {
             if (err) {
-
+                return
             }
+            setRoomsLoadState("loading")
         })
     }
 
@@ -91,10 +92,10 @@ function HomePage(props) {
             </ListItem>
         })
     } else  if (roomsLoadState === 'loading'){
-
+        roomsUI = <div style={{textAlign:"center", margin : "15px"}}>Loading...</div>
     }
     else  if (roomsLoadState === 'error'){
-
+        roomsUI = <div style={{textAlign:"center", margin : "15px"}}>Error</div>
     }
 
     return (
