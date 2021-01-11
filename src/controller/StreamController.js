@@ -90,8 +90,10 @@ export class StreamController {
         this.pc.onicecandidate = this.handleICECandidate(id);
 
         this.pc.addTransceiver('video', { 'direction': 'recvonly' });
-        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
-        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+
+        for (let index = 0; index < 10; index++) {
+            this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        }
         this.pc.ontrack = this.handleTrack;
 
         let sendChannel = this.pc.createDataChannel(id)
