@@ -90,6 +90,7 @@ export class StreamController {
 
         this.pc.addTransceiver('video', { 'direction': 'recvonly' });
         this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
 
         let sendChannel = this.pc.createDataChannel(id)
@@ -120,6 +121,7 @@ export class StreamController {
     }
 
     handleTrack(event) {
+        console.log(event.streams.length)
         var mediaStreamTrack = event.streams[0]
         if (mediaStreamTrack.id === 'video') {
             let el = document.getElementById('id_video');
