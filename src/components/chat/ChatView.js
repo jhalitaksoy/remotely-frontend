@@ -7,6 +7,12 @@ import { getChat, sendChatMessage, setOnMessageCallback, createSurvey, setSurvey
 import { Button, Chip, Dialog, DialogTitle, TextField, Typography } from '@material-ui/core';
 import MoreIcon from '@material-ui/icons/MoreVertOutlined';
 import SurveyList from '../SurveyList';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogActions from '@material-ui/core/DialogActions';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+
 const useStyles = makeStyles((theme) => ({
     container: {
         width: '100%',
@@ -139,7 +145,7 @@ function ChatView(props) {
     };
 
 
-    const onSurveyEnd = (surveyID)=>{
+    const onSurveyEnd = (surveyID) => {
         const survey = getSurveyByID(surveyID)
         const index = surveys.indexOf(survey)
 
@@ -147,9 +153,9 @@ function ChatView(props) {
         setSurveys([...surveys])
     }
 
-    const getSurveyByID = (surveyID) =>{
+    const getSurveyByID = (surveyID) => {
         for (const survey of surveys) {
-            if(survey.ID === surveyID){
+            if (survey.ID === surveyID) {
                 return survey
             }
         }
@@ -157,7 +163,7 @@ function ChatView(props) {
 
     setSurveyEndMessageCallback(onSurveyEnd)
 
-    const onSurveyUpdate = (survey)=>{
+    const onSurveyUpdate = (survey) => {
         const surveyFound = getSurveyByID(survey.ID)
         const index = surveys.indexOf(surveyFound)
         surveys[index] = survey
@@ -250,8 +256,20 @@ function SurveyDialog(props) {
     }
 
     return (
-        <Dialog open={props.open} onClose={props.handleClose} >
-            <DialogTitle>Create Survey</DialogTitle>
+        <Dialog open={props.open} onClose={props.onClose} >
+            <MuiDialogTitle disableTypography >
+                <Typography variant="h6">{"Create Survey"}</Typography>
+
+                <IconButton aria-label="close" onClick={props.onClose} style={{
+                    position: 'absolute',
+                    right: 5,
+                    top: 5,
+                }}>
+                    <CloseIcon />
+                </IconButton>
+
+            </MuiDialogTitle>
+            {/*<DialogTitle>Create Survey</DialogTitle>*/}
             <div style={{
                 padding: "0px 20px 20px 25px",
                 display: 'flex',
