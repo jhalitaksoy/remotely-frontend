@@ -59,7 +59,10 @@ export class StreamController {
 
     async publish() {
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
-        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        //this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        for (let index = 0; index < 10; index++) {
+            this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        }
         this.pc.ontrack = this.handleTrack;
         // todo : WTF
         var id = 0
