@@ -21,8 +21,8 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
         textAlign: 'center',
     },
-    appbar : {
-        borderBottom : '1px solid #dcd3d3',
+    appbar: {
+        borderBottom: '1px solid #dcd3d3',
     },
 }));
 
@@ -42,8 +42,8 @@ function MyAppBar(props) {
                 </IconButton>
                 <Typography variant="h6" className={classes.title}>
                     {props.title}
-            </Typography>
-                <Button color="inherit" onClick={logoutClick}><AccountCircleOutlined/></Button>
+                </Typography>
+                <Button color="inherit" onClick={logoutClick}><AccountCircleOutlined /></Button>
             </Toolbar>
         </AppBar>
     )

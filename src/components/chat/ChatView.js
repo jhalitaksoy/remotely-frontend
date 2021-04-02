@@ -4,12 +4,10 @@ import MessageList from './MessageList';
 import MessageSender from './MessageSender';
 import { useState, useRef, useEffect } from 'react';
 import { getChat, sendChatMessage, setOnMessageCallback, createSurvey, setSurveyCreateMessageCallback, setSurveyEndMessageCallback, setSurveyUpdateMessageCallback } from '../../controller/ChatController';
-import { Button, Chip, Dialog, DialogTitle, TextField, Typography } from '@material-ui/core';
+import { Button, Chip, Dialog, TextField, Typography } from '@material-ui/core';
 import MoreIcon from '@material-ui/icons/MoreVertOutlined';
 import SurveyList from '../SurveyList';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 

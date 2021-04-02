@@ -50,7 +50,15 @@ function RoomPage(params) {
     //const [connectionState, setConnectionState] = useState("empty")
     const [streamController, setStreamController] = useState(undefined)
     const [roomLoadState, setRoomLoadState] = useState("loading")
-    const [micState, setMicState] = useState(true)
+    const [micState, setMicState] = useState(false)
+
+    const updateMicState = () => {
+        if (micState)
+            streamController.pauseAudioSend();
+        else
+            streamController.resumeAudioSend();
+    }
+
 
     useEffect(() => {
         if (roomLoadState !== "loaded") {
@@ -64,7 +72,8 @@ function RoomPage(params) {
                 const streamController = new StreamController()
                 setStreamController(streamController)
                 streamController.start(res.ID, onStatusChange)
-                streamController.join()
+                streamController.join(micState)
+                //updateMicState()
             })
         }
     })
@@ -77,7 +86,7 @@ function RoomPage(params) {
         const videoWorks = !!document.createElement('video').canPlayType;
         if (videoWorks) {
             video.controls = false;
-            if(videoControls    ){
+            if (videoControls) {
                 videoControls.classList.remove('hidden');
             }
         }
@@ -92,25 +101,24 @@ function RoomPage(params) {
     const onShareScreenClick = (e) => {
         streamController.cancel()
         streamController.start(room.ID, onStatusChange)
-        streamController.publish()
+        streamController.publish(micState)
+        //updateMicState()
     }
 
     const onOpenAudioClick = (e) => {
         setMicState(!micState)
-        if (micState)
-            streamController.pauseAudioSend();
-        else
-            streamController.resumeAudioSend();
+        updateMicState()
     }
+
 
     let content;
 
-    if (roomLoadState == "loading") {
+    if (roomLoadState === "loading") {
         content =
             <Box display="flex" height="100%" flexDirection="column">
                 <div>Loading</div>
             </Box>
-    } else if (roomLoadState == "error") {
+    } else if (roomLoadState === "error") {
         content =
             <Box display="flex" height="100%" flexDirection="column">
                 <div>Not Found</div>

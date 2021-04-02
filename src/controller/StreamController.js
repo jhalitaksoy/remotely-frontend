@@ -57,7 +57,7 @@ export class StreamController {
         return pc
     }
 
-    async publish() {
+    async publish(micstate) {
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
         //this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         for (let index = 0; index < 10; index++) {
@@ -78,14 +78,14 @@ export class StreamController {
             console.log({ datachannel_error: ev });
         })
         try {
-            await this.startMedia(this.pc)
+            await this.startMedia(this.pc, micstate)
             return instance.createOffer()
         } catch (error) {
             console.log(error)
         }
     }
 
-    async join() {
+    async join(micstate) {
         let timestamp = Date.now();
         let rnd = Math.floor(Math.random() * 1000000000);
         let id = "Client:" + timestamp.toString() + ":" + rnd.toString()
@@ -110,7 +110,7 @@ export class StreamController {
             console.log({ datachannel_error: ev });
         })
 
-        await this.createAudioStream(this.pc)
+        await this.createAudioStream(this.pc, micstate)
 
         this.createOffer(this.pc)
     }
@@ -176,13 +176,18 @@ export class StreamController {
         requestAnimationFrame(updateCanvas);
     }
 
-    async createAudioStream(pc) {
+    async createAudioStream(pc, micstate) {
         const streamAudio = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
         })
         streamAudio.getTracks().forEach(track => pc.addTrack(track, streamAudio))
         this.streamAudio = streamAudio;
+        if(micstate === true){
+            this.resumeAudioSend()
+        }else{
+            this.pauseAudioSend()
+        }
     }
 
     pauseAudioSend() {
@@ -193,9 +198,9 @@ export class StreamController {
         this.streamAudio.getTracks().forEach(track => track.enabled = true)
     }
 
-    async startMedia(pc) {
+    async startMedia(pc,micstate) {
         try {
-            await this.createAudioStream(pc)
+            await this.createAudioStream(pc, micstate)
 
             const streamVideo = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
             document.getElementById("id_video").srcObject = streamVideo;
@@ -238,13 +243,16 @@ export class StreamController {
     async sendToServer(url, msg) {
         try {
             const user = currentUser()
-            const id = parseInt(user.id)
+            let headers = {
+                'Content-Type': 'text/plain; charset=utf-8',
+            }
+            if(user){
+                const id = parseInt(user.id)
+                headers['userid'] = id
+            }
             let response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain; charset=utf-8',
-                    'userid': id
-                },
+                headers: headers,
                 body: msg
             })
             // Verify HTTP-status is 200-299

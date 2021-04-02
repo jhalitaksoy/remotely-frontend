@@ -6,7 +6,7 @@ export function serverUrl() {
     //return 'http://192.168.43.2:80' 
     //return 'http://127.0.0.1:8080'
     //return 'https://34.107.125.219'
-    return 'https://46.101.134.10/remotely'
+    return 'https://halitaksoy.com/remotely'
 }
 
 function headers() {
