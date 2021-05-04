@@ -1,6 +1,5 @@
 import { serverUrl } from "../service/NetworkService";
 import { convertFromBytes } from "../util/datachannel_util";
-import { currentUser } from "./UserController";
 import { onMessage } from "./ChatController"
 
 var mediaConstraints = {
@@ -121,24 +120,30 @@ export class StreamController {
         }
     }
 
-    onDataChannelMessage(e){
+    onDataChannelMessage(e) {
         const { type, message } = convertFromBytes(e.data)
         onMessage(type, message)
     }
 
     handleTrack(event) {
+        console.log("### Received track");
         console.log(event.streams.length)
+        console.log(event.streams)
         var mediaStreamTrack = event.streams[0]
-        if (mediaStreamTrack.id === 'video') {
-            let el = document.getElementById('id_video');
-            el.srcObject = mediaStreamTrack
-            el.autoplay = true
-            el.controls = true
-        } else if (event.streams[0].id === 'audio') {
-            const audioBox = document.querySelector('audio#audioBox')
-            console.log("Received audio track");
-            audioBox.srcObject = event.streams[0];
+        if (mediaStreamTrack) {
+            if (mediaStreamTrack.id === 'video') {
+                console.log("Received video track");
+                let el = document.getElementById('id_video');
+                el.srcObject = mediaStreamTrack
+                el.autoplay = true
+                el.controls = true
+            } else if (event.streams[0].id === 'audio') {
+                const audioBox = document.querySelector('audio#audioBox')
+                console.log("Received audio track");
+                audioBox.srcObject = event.streams[0];
+            }
         }
+
     }
 
     instance() {
@@ -183,9 +188,9 @@ export class StreamController {
         })
         streamAudio.getTracks().forEach(track => pc.addTrack(track, streamAudio))
         this.streamAudio = streamAudio;
-        if(micstate === true){
+        if (micstate === true) {
             this.resumeAudioSend()
-        }else{
+        } else {
             this.pauseAudioSend()
         }
     }
@@ -198,7 +203,7 @@ export class StreamController {
         this.streamAudio.getTracks().forEach(track => track.enabled = true)
     }
 
-    async startMedia(pc,micstate) {
+    async startMedia(pc, micstate) {
         try {
             await this.createAudioStream(pc, micstate)
 
@@ -229,7 +234,11 @@ export class StreamController {
                         Name: username,
                         SD: instance.pc.localDescription
                     };
-                    let sdp = await instance.sendToServer(serverUrl() + "/stream/sdp/" + instance.roomid, JSON.stringify(msg))
+                    let route = "/stream/sdp/"
+                    if (window.currentUser()) {
+                        route = "/stream_private/sdp/"
+                    }
+                    let sdp = await instance.sendToServer(serverUrl() + route + instance.roomid, JSON.stringify(msg))
                     console.log({ sdp })
                     await instance.pc.setRemoteDescription(new RTCSessionDescription(sdp))
                 }
@@ -242,13 +251,12 @@ export class StreamController {
 
     async sendToServer(url, msg) {
         try {
-            const user = currentUser()
+            const user = window.currentUser()
             let headers = {
                 'Content-Type': 'text/plain; charset=utf-8',
             }
-            if(user){
-                const id = parseInt(user.id)
-                headers['userid'] = id
+            if (user) {
+                headers['Authorization'] = "Bearer " + user
             }
             let response = await fetch(url, {
                 method: 'POST',

@@ -2,7 +2,6 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, TextField } from '@material-ui/core';
 import { useState } from 'react';
-import { currentUser } from '../../controller/UserController';
 import SendIcon from '@material-ui/icons/Send';
 
 const useStyles = makeStyles((thme) => ({
@@ -21,7 +20,7 @@ const MessageSender = (props) => {
     }
 
     const onSendMessage = () => {
-        const user = currentUser()
+        const user = window.currentUser
         const newMessage = {
             user: {
                 ID: parseInt(user.id),
