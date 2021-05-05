@@ -1,21 +1,10 @@
 import { serverUrl } from "../service/NetworkService";
-import { decode } from "../util/encode_decode_message";
-import { onMessage } from "./ChatController"
 
 var mediaConstraints = {
     audio: false, // We dont want an audio track
     video: true // ...and we want a video track
 };
 
-export const messageTypes = {
-    chat: 0,
-    surveyCreate: 1,
-    surveyVote: 2,
-    surveyUpdate: 3,
-    surveyEnd: 4,
-}
-
-Object.freeze(messageTypes)
 
 export let dataChannel = {}
 
@@ -107,11 +96,6 @@ export class StreamController {
         this.pc.onconnectionstatechange = ev => {
             setOnlineStatus(this.pc.connectionState)
         }
-    }
-
-    onDataChannelMessage(e) {
-        const { type, message } = decode(e.data)
-        onMessage(type, message)
     }
 
     handleTrack(event) {

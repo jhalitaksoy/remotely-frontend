@@ -1,4 +1,4 @@
-import { jwtKey, loginRedirect, logoutUser } from "../controller/UserController";
+import { jwtKey, logoutUser } from "../controller/UserController";
 
 const { default: Axios } = require("axios");
 

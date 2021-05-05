@@ -1,6 +1,4 @@
 import { post } from '../service/NetworkService';
-import { encode } from '../util/encode_decode_message';
-import { messageTypes, dataChannel } from '../controller/StreamController';
 
 /// chat message
 
@@ -34,9 +32,9 @@ export function listenChatMessage(callback){
 }
 
 /// survey
-
+/*
 export function createSurvey(survey) {
-    dataChannel.send(encode(messageTypes.surveyCreate, JSON.stringify(survey)))
+    //dataChannel.send(encode(messageTypes.surveyCreate, JSON.stringify(survey)))
 }
 
 export let onSurveyCreateMessageCallback = undefined
@@ -56,7 +54,7 @@ export function voteSurvey(surveyID, optionID) {
         "surveyID": surveyID,
         "optionID": optionID
     }
-    dataChannel.send(encode(messageTypes.surveyVote, JSON.stringify(vote)))
+    //dataChannel.send(encode(messageTypes.surveyVote, JSON.stringify(vote)))
 }
 
 export let onSurveyUpdateMessageCallback = undefined
@@ -82,4 +80,4 @@ function onSurveyEndMessage(message) {
     if (onSurveyEndMessageCallback) {
         onSurveyEndMessageCallback(json.surveyID)
     }
-}
+}*/

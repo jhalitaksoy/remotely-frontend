@@ -54,7 +54,7 @@ function RoomList(props) {
                 </Typography>
             </Box>
         )
-    } else if (!rooms || rooms.lenght == 0) {
+    } else if (!rooms || rooms.lenght === 0) {
         child = (
             <Box textAlign="center" paddingBottom="10px">
                 Empty

@@ -27,7 +27,7 @@ export class RealtimeMessageTransport {
     }
 
     sendMessage(channel, message) {
-        if(this.dataChannel == undefined){
+        if(this.dataChannel === undefined){
             console.log('DataChannel is undefined')
             return
         }
