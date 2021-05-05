@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { Box, Grid, Paper } from '@material-ui/core';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-import { createRoom } from '../controller/RoomControlker';
+import { createRoom } from '../controller/RoomController';
 import MyAppBar from '../components/MyAppBar';
 import RoomList from '../components/RoomList';
 import Button from '@material-ui/core/Button';

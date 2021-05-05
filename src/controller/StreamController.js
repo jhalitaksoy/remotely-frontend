@@ -1,5 +1,5 @@
 import { serverUrl } from "../service/NetworkService";
-import { convertFromBytes } from "../util/datachannel_util";
+import { decode } from "../util/encode_decode_message";
 import { onMessage } from "./ChatController"
 
 var mediaConstraints = {
@@ -63,19 +63,9 @@ export class StreamController {
             this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         }
         this.pc.ontrack = this.handleTrack;
-        // todo : WTF
-        var id = 0
 
-        let sendChannel = this.pc.createDataChannel(id)
-        sendChannel.onclose = () => console.log('sendChannel has closed')
-        sendChannel.onopen = () => {
-            this.sendChannel = sendChannel
-            dataChannel = sendChannel
-        }
-        sendChannel.onmessage = this.onDataChannelMessage
-        sendChannel.addEventListener("error", ev => {
-            console.log({ datachannel_error: ev });
-        })
+        this.createDataChannel(this.pc)
+
         try {
             await this.startMedia(this.pc, micstate)
             return instance.createOffer()
@@ -98,20 +88,19 @@ export class StreamController {
         }
         this.pc.ontrack = this.handleTrack;
 
-        let sendChannel = this.pc.createDataChannel(id)
-        sendChannel.onclose = () => console.log('sendChannel has closed')
-        sendChannel.onopen = () => {
-            this.sendChannel = sendChannel
-            dataChannel = sendChannel
-        }
-        sendChannel.onmessage = this.onDataChannelMessage
-        sendChannel.addEventListener("error", ev => {
-            console.log({ datachannel_error: ev });
-        })
+        this.createDataChannel(this.pc)
 
         await this.createAudioStream(this.pc, micstate)
 
         this.createOffer(this.pc)
+    }
+
+    createDataChannel(pc) {
+        // todo : looklater
+        var id = 0
+        let dataChannel = pc.createDataChannel(id)
+        this.dataChannel = dataChannel
+        window.rtmt.setDataChannel(dataChannel)
     }
 
     handleConnectionStatus(setOnlineStatus) {
@@ -121,7 +110,7 @@ export class StreamController {
     }
 
     onDataChannelMessage(e) {
-        const { type, message } = convertFromBytes(e.data)
+        const { type, message } = decode(e.data)
         onMessage(type, message)
     }
 

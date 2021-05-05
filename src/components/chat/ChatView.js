@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import MessageList from './MessageList';
 import MessageSender from './MessageSender';
 import { useState, useRef, useEffect } from 'react';
-import { getChat, sendChatMessage, setOnMessageCallback, createSurvey, setSurveyCreateMessageCallback, setSurveyEndMessageCallback, setSurveyUpdateMessageCallback } from '../../controller/ChatController';
+import { getChat, sendChatMessage, createSurvey, setSurveyCreateMessageCallback, setSurveyEndMessageCallback, setSurveyUpdateMessageCallback, listenChatMessage } from '../../controller/ChatController';
 import { Button, Chip, Dialog, TextField, Typography } from '@material-ui/core';
 import MoreIcon from '@material-ui/icons/MoreVertOutlined';
 import SurveyList from '../SurveyList';
@@ -101,7 +101,7 @@ function ChatView(props) {
                 return
             }
             setChatLoadState("loaded")
-            setOnMessageCallback(onChatMessage)
+            listenChatMessage(onChatMessage)
             if (data) setMessages(data)
         })
     }
