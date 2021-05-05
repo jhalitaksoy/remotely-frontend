@@ -10,6 +10,9 @@ import HomePage from './routes/HomePage';
 import RegisterPage from './routes/RegisterPage';
 import RoomPage from './routes/RoomPage';
 import ChatView from './components/chat/ChatView';
+import { RealtimeMessageTransport } from './rmt/rtmt';
+
+window.rtmt = new RealtimeMessageTransport()
 
 
 function App() {
