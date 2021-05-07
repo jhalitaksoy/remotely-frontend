@@ -1,6 +1,8 @@
 import { post } from '../service/NetworkService';
-import { convertToBytes } from '../util/datachannel_util';
-import { messageTypes, dataChannel } from '../controller/StreamController';
+
+/// chat message
+
+const ChannelChat = "chat"
 
 export function getChat(roomid, callback) {
     post(`/room/chat/${roomid}`, "")
@@ -12,43 +14,27 @@ export function getChat(roomid, callback) {
         })
 }
 
-export let onMessageCallback = undefined
-
-export function setOnMessageCallback(callback) { onMessageCallback = callback }
-
-function onChatMessage(message) {
-    let json = JSON.parse(message);
-    console.log("New Chat Message : " + message)
-    if (onMessageCallback) {
-        onMessageCallback(json)
-    }
+export function sendChatMessage(message) { 
+    const json = JSON.stringify(message)
+    console.log(json);
+    const textEncoder = new TextEncoder("utf-8")
+    const messageBytes = textEncoder.encode(json)
+    window.rtmt.sendMessage(ChannelChat,messageBytes)
 }
 
-export function onMessage(type, message) {
-    if (type === messageTypes.chat) {
-        onChatMessage(message)
-    } else if (type === messageTypes.surveyCreate) {
-        onSurveyCreateMessage(message)
-    } else if (type === messageTypes.surveyUpdate) {
-        onSurveyUpdateMessage(message)
-    } else if (type === messageTypes.surveyEnd) {
-        onSurveyEndMessage(message)
-    } else {
-        console.log("Unknown message type : " + type)
-    }
+export function listenChatMessage(callback){
+    window.rtmt.listenMessage(ChannelChat, (message)=>{
+        const textDecoder = new TextDecoder("utf-8")
+        const json = textDecoder.decode(message)
+        const chatMessage = JSON.parse(json)
+        callback(chatMessage)
+    })
 }
 
-//Convert object array buffer to string 
-//function ab2str(buf) {
-//    return String.fromCharCode.apply(null, new Uint8Array(buf));
-//}
-
-export function sendChatMessage(message) {
-    dataChannel.send(convertToBytes(messageTypes.chat, JSON.stringify(message)))
-}
-
+/// survey
+/*
 export function createSurvey(survey) {
-    dataChannel.send(convertToBytes(messageTypes.surveyCreate, JSON.stringify(survey)))
+    //dataChannel.send(encode(messageTypes.surveyCreate, JSON.stringify(survey)))
 }
 
 export let onSurveyCreateMessageCallback = undefined
@@ -68,7 +54,7 @@ export function voteSurvey(surveyID, optionID) {
         "surveyID": surveyID,
         "optionID": optionID
     }
-    dataChannel.send(convertToBytes(messageTypes.surveyVote, JSON.stringify(vote)))
+    //dataChannel.send(encode(messageTypes.surveyVote, JSON.stringify(vote)))
 }
 
 export let onSurveyUpdateMessageCallback = undefined
@@ -94,4 +80,4 @@ function onSurveyEndMessage(message) {
     if (onSurveyEndMessageCallback) {
         onSurveyEndMessageCallback(json.surveyID)
     }
-}
+}*/

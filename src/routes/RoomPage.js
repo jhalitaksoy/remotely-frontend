@@ -2,7 +2,7 @@ import { Box, Button, Toolbar } from '@material-ui/core';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MyAppBar from '../components/MyAppBar';
-import { getRoom } from '../controller/RoomControlker';
+import { getRoom } from '../controller/RoomController';
 import { StreamController } from '../controller/StreamController';
 import { makeStyles } from '@material-ui/core/styles'
 import ChatView from '../components/chat/ChatView';

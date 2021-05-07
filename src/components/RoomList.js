@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import ShareIcon from '@material-ui/icons/Share';
 import ImageIcon from '@material-ui/icons/Image';
-import { listRooms } from '../controller/RoomControlker';
+import { listRooms } from '../controller/RoomController';
 import { useHistory } from 'react-router-dom';
 
 function RoomList(props) {
@@ -54,7 +54,7 @@ function RoomList(props) {
                 </Typography>
             </Box>
         )
-    } else if (!rooms || rooms.lenght == 0) {
+    } else if (!rooms || rooms.lenght === 0) {
         child = (
             <Box textAlign="center" paddingBottom="10px">
                 Empty

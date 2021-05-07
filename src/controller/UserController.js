@@ -2,10 +2,10 @@
 import { post } from '../service/NetworkService';
 // user.name 
 //
-export function loginUser(user, callback) {
-    post(`/user/login`, user).then(response => {
-        const userID = response.data
-        window.localStorage.setItem("userID", userID)
+export function loginUser(loginparameters, callback) {
+    post(`/user/login`, loginparameters).then(response => {
+        const jwt = response.data
+        window.localStorage.setItem("jwt", jwt)
         callback()
     }).catch(error => {
         if (error.response) {
@@ -19,9 +19,8 @@ export function loginUser(user, callback) {
     })
 }
 
-export function registerUser(user, callback) {
-    post(`/user/register`, user).then(response => {
-        //const userID = response.data
+export function registerUser(registerparameters, callback) {
+    post(`/user/register`, registerparameters).then(response => {
         callback()
     }).catch(error => {
         if (error.response) {
@@ -35,17 +34,15 @@ export function registerUser(user, callback) {
 }
 
 export function logoutUser() {
-    window.localStorage.removeItem("userID")
+    window.localStorage.removeItem("jwt")
 }
 
-export function currentUser() {
-    const userID = window.localStorage.getItem("userID")
-    if (userID) {
-        return { id: userID }
-    }
+export function jwtKey() {
+    const jwt = window.localStorage.getItem("jwt")
+   return jwt
 }
 
-window.currentUser = currentUser;
+window.currentUser = jwtKey;
 
 export const loginRedirect = {
     afterLogin: undefined,

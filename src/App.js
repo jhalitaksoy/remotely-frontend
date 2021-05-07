@@ -10,7 +10,9 @@ import HomePage from './routes/HomePage';
 import RegisterPage from './routes/RegisterPage';
 import RoomPage from './routes/RoomPage';
 import ChatView from './components/chat/ChatView';
-import { currentUser } from './controller/UserController';
+import { RealtimeMessageTransport } from './rmt/rtmt';
+
+window.rtmt = new RealtimeMessageTransport()
 
 
 function App() {
@@ -39,7 +41,7 @@ function PrivateRoutes({ children, ...rest }) {
   return (
     <Route {...rest}
       render={({ location }) => {
-        if (currentUser()) {
+        if (window.currentUser()) {
           return children;
         } else {
           return <Redirect to={{ pathname: "/login", state: { from: location } }}

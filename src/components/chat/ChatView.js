@@ -3,9 +3,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import MessageList from './MessageList';
 import MessageSender from './MessageSender';
 import { useState, useRef, useEffect } from 'react';
-import { getChat, sendChatMessage, setOnMessageCallback, createSurvey, setSurveyCreateMessageCallback, setSurveyEndMessageCallback, setSurveyUpdateMessageCallback } from '../../controller/ChatController';
+import { getChat, sendChatMessage, listenChatMessage } from '../../controller/ChatController';
 import { Button, Chip, Dialog, TextField, Typography } from '@material-ui/core';
-import MoreIcon from '@material-ui/icons/MoreVertOutlined';
+//import MoreIcon from '@material-ui/icons/MoreVertOutlined';
 import SurveyList from '../SurveyList';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
@@ -87,11 +87,11 @@ function ChatView(props) {
 
     const [surveyDialogOpen, setSurveyDialogOpen] = React.useState(false)
 
-    const [surveys, setSurveys] = React.useState([])
+    const [surveys, /*setSurveys*/] = React.useState([])
 
-    setSurveyCreateMessageCallback((survey) => {
+    /*setSurveyCreateMessageCallback((survey) => {
         setSurveys([...surveys, survey])
-    })
+    })*/
 
     if (chatLoadState === 'init') {
         setChatLoadState("loading")
@@ -101,7 +101,7 @@ function ChatView(props) {
                 return
             }
             setChatLoadState("loaded")
-            setOnMessageCallback(onChatMessage)
+            listenChatMessage(onChatMessage)
             if (data) setMessages(data)
         })
     }
@@ -119,7 +119,7 @@ function ChatView(props) {
         sendChatMessage(message)
     }
 
-    const handleChatOpen = () => {
+    /*const handleChatOpen = () => {
         setSurveyDialogOpen(true)
         //createSurvey({
         //    "text": "surveyText",
@@ -136,45 +136,45 @@ function ChatView(props) {
         //        },
         //    ],
         //})
-    }
+    }*/
 
     const handleClose = (value) => {
         setSurveyDialogOpen(false);
     };
 
 
-    const onSurveyEnd = (surveyID) => {
+    /*const onSurveyEnd = (surveyID) => {
         const survey = getSurveyByID(surveyID)
         const index = surveys.indexOf(survey)
 
         surveys.splice(index, 1)
         setSurveys([...surveys])
-    }
+    }*/
 
-    const getSurveyByID = (surveyID) => {
+    /*const getSurveyByID = (surveyID) => {
         for (const survey of surveys) {
             if (survey.ID === surveyID) {
                 return survey
             }
         }
-    }
+    }*/
 
-    setSurveyEndMessageCallback(onSurveyEnd)
+    //setSurveyEndMessageCallback(onSurveyEnd)
 
-    const onSurveyUpdate = (survey) => {
+    /*const onSurveyUpdate = (survey) => {
         const surveyFound = getSurveyByID(survey.ID)
         const index = surveys.indexOf(surveyFound)
         surveys[index] = survey
         setSurveys([...surveys])
-    }
+    }*/
 
-    setSurveyUpdateMessageCallback(onSurveyUpdate)
+    //setSurveyUpdateMessageCallback(onSurveyUpdate)
 
     return (
         <div className={classes.container}>
             <div className={classes.chatTitle}>
                 <Typography variant="h5">Chat</Typography>
-                <Button style={{ marginLeft: "auto" }} onClick={handleChatOpen}><MoreIcon /></Button>
+                {/*<Button style={{ marginLeft: "auto" }} onClick={handleChatOpen}><MoreIcon /></Button>*/}
             </div>
             <SurveyList surveys={surveys} />
             <MessageList messages={messages} />
@@ -235,13 +235,13 @@ function SurveyDialog(props) {
 
     const onSurveyCreate = () => {
         props.onClose()
-        createSurvey({
+        /*createSurvey({
             "text": surveyText,
             "options": getOptions(),
-        })
+        })*/
     }
 
-    const getOptions = () => {
+    /*const getOptions = () => {
         let count = -1
         return options.map((option) => {
             count++
@@ -251,7 +251,7 @@ function SurveyDialog(props) {
                 "count": 0,
             }
         })
-    }
+    }*/
 
     return (
         <Dialog open={props.open} onClose={props.onClose} >
@@ -285,7 +285,7 @@ function SurveyDialog(props) {
                 <Typography style={{ marginTop: '10px' }} variant='subtitle2'>Options</Typography>
 
                 {
-                    options.length == 0 ? <div style={{
+                    options.length === 0 ? <div style={{
                         padding: "20px 20px 10px 5px",
                         alignSelf: 'stretch',
                     }}> There is no option! </div> :

@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
-import { Redirect } from "react-router-dom";
-//import { makeStyles } from '@material-ui/core/styles'
-import { currentUser } from '../controller/UserController';
-import { useHistory } from "react-router-dom";
 import { Box, Grid, Paper } from '@material-ui/core';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-import { createRoom } from '../controller/RoomControlker';
+import { createRoom } from '../controller/RoomController';
 import MyAppBar from '../components/MyAppBar';
 import RoomList from '../components/RoomList';
 import Button from '@material-ui/core/Button';
@@ -31,11 +27,11 @@ import Dialog from '@material-ui/core/Dialog';
 
 function HomePage(props) {
     //const classes = useStyles()
-    const history = useHistory()
+    //const history = useHistory()
 
     const [roomListKey, setRoomListKey] = useState(0)
 
-    const [createRoomDialogOpen, setCreateRoomDialogOpen] = React.useState(false);
+    //const [createRoomDialogOpen, setCreateRoomDialogOpen] = React.useState(false);
 
     const updateRoomList = () => {
         setRoomListKey(roomListKey + 1)
@@ -88,9 +84,9 @@ export default HomePage
 function CreateRoomDialog(props) {
     const [open, setOpen] = React.useState(props.open);
 
-    const handleClickOpen = () => {
+    /*const handleClickOpen = () => {
         setOpen(true);
-    };
+    };*/
 
     const handleClose = () => {
         setOpen(false);
