@@ -10,7 +10,36 @@ export let dataChannel = {}
 
 let instance;
 
+const ChannelSDP = "sdp"
+
 export class StreamController {
+
+    constructor(){
+        this.listenSdp()
+    }
+
+    async listenSdp(){
+          window.rtmt.listenMessage(ChannelSDP, (message)=>{
+            this.onSdpMessage(this, message)
+        })
+    }
+
+    async onSdpMessage(_this, message){
+        console.log("OnSDPMesssage");
+        const textDecoder = new TextDecoder("utf-8")
+        let json = textDecoder.decode(message)
+        const remoteSDP = JSON.parse(json)
+        await _this.pc.setRemoteDescription(remoteSDP)
+
+        const sdp = await _this.pc.createAnswer()
+        _this.pc.setLocalDescription(sdp)
+
+        json = JSON.stringify(sdp)
+        const textEncoder = new TextEncoder("utf-8")
+        const sdpBytes = textEncoder.encode(json)
+        window.rtmt.sendMessage(ChannelSDP,sdpBytes)
+    }
+
     start(roomid, setOnlineStatus) {
         this.pc = this.createPC();
         this.handleConnectionStatus(setOnlineStatus)
