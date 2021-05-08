@@ -21,31 +21,17 @@ function LoginPage(props) {
             setLoginError("User password cannot be blank!")
             return
         }
-        loginUser({
+
+        const loginParameters = {
             Name: userName,
             Password: userPass,
-        }, (error) => {
+        }
+
+        loginUser(loginParameters, (error) => {
             if (error) {
                 setLoginError(error)
             } else {
                 history.replace("/")
-            }
-        })
-        const user = {
-            Name: userName,
-            Password: userPass,
-        }
-        registerUser(user, (error) => {
-            if (error && error !== "User name already using :(. Try new one.") {
-                setLoginError(error)
-            } else {
-                loginUser(user, (error) => {
-                    if (error) {
-                        history.replace("/login")
-                    } else {
-                        history.replace("/")
-                    }
-                })
             }
         })
     }

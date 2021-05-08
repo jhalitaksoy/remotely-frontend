@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Grid, Paper } from '@material-ui/core';
+import { Box, Grid, Paper, Snackbar } from '@material-ui/core';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import { createRoom } from '../controller/RoomController';
@@ -12,6 +12,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 //const useStyles = makeStyles((theme) => ({
 //    root: {
@@ -31,35 +33,50 @@ function HomePage(props) {
 
     const [roomListKey, setRoomListKey] = useState(0)
 
-    //const [createRoomDialogOpen, setCreateRoomDialogOpen] = React.useState(false);
+    const [createRoomDialogOpen, setCreateRoomDialogOpen] = React.useState(false);
+    const [snackBarOpen, setSnackBarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState();
 
     const updateRoomList = () => {
         setRoomListKey(roomListKey + 1)
     }
 
-    //if (!currentUser()) {
-    //    return <Redirect to="/login" />
-    //}
+    const onCreateRoomClick = () => {
+        setCreateRoomDialogOpen(true)
+    }
 
-    //const logoutClick = () => {
-    //    logoutUser()
-    //    history.replace("/login")
-    //}
-
-    const onCreateRoom = () => {
-        const name = window.prompt("Room Name", "Room1")
-        createRoom({ Name: name }, (res, err) => {
+    const onRoomCreate = (roomName) => {
+        setCreateRoomDialogOpen(false)
+        createRoom({ Name: roomName }, (res, err) => {
             if (err) {
+                setSnackbarMessage(err.toString())
+                setSnackBarOpen(true)
                 return
             }
             updateRoomList()
         })
     }
 
+    const handleCreateFromClose = () => {
+        setCreateRoomDialogOpen(false)
+    }
+
+    const handleSnackBarClick = () => {
+        setSnackBarOpen(true);
+    };
+
+    const handleSnackBarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setSnackBarOpen(false);
+    };
+
     return (
         <>
             <MyAppBar title="Remotely" />
-            <CreateRoomDialog />
+            <CreateRoomDialog open={createRoomDialogOpen} handleClose={handleCreateFromClose} onCreate={onRoomCreate} />
             <Grid justify="center" container>
                 <Grid item xs={12} sm={4}>
                     <Paper style={{ margin: '10px' }}>
@@ -68,7 +85,7 @@ function HomePage(props) {
                             paddingBottom="10px"
                             paddingRight="10px">
                             <Fab
-                                onClick={onCreateRoom}
+                                onClick={onCreateRoomClick}
                                 size='small' color="primary" aria-label="add">
                                 <AddIcon />
                             </Fab>
@@ -76,29 +93,54 @@ function HomePage(props) {
                     </Paper>
                 </Grid>
             </Grid>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                open={snackBarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackBarClose}
+                message={snackbarMessage}
+                action={
+                    <React.Fragment>
+                        <IconButton size="small" aria-label="close" color="inherit" onClick={handleSnackBarClose}>
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    </React.Fragment>
+                }
+            />
         </>
     )
 }
 export default HomePage
 
 function CreateRoomDialog(props) {
-    const [open, setOpen] = React.useState(props.open);
 
-    /*const handleClickOpen = () => {
-        setOpen(true);
-    };*/
+    const [roomName, setRoomName] = useState();
+    const [roomNameSuitable, setRoomNameSuitable] = useState(false);
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const onChange = (e) => {
+        setRoomName(e.target.value)
+        checkNameIsSuitable(e.target.value)
+    }
+
+    const checkNameIsSuitable = (name)=>{
+        if(name){
+            if(name.length > 0){
+                setRoomNameSuitable(true)
+                return
+            }
+        }
+        setRoomNameSuitable(false)
+    }
+
     return (
-        <Dialog open={open}>
+        <Dialog open={props.open}>
             <DialogTitle id="form-dialog-title">Create Room</DialogTitle>
             <DialogContent>
-                <DialogContentText>
-                    Create a room.
-                </DialogContentText>
                 <TextField
+                    onChange={onChange}
                     variant="outlined"
                     autoFocus
                     id="name"
@@ -106,11 +148,13 @@ function CreateRoomDialog(props) {
                     fullWidth
                 />
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose} color="primary">
+            <DialogActions >
+                <Button onClick={props.handleClose} color="primary">
                     Cancel
                 </Button>
-                <Button onClick={handleClose} color="primary" variant="contained">
+               <Button disabled={!roomNameSuitable} onClick={()=>{
+                   props.onCreate(roomName)
+               }} color="primary" variant="contained">
                     Create
                 </Button>
             </DialogActions>

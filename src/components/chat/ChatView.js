@@ -32,51 +32,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-/*const testData = [{
-    ID: 0,
-    user: {
-        ID: 0,
-        name: 'hlt'
-    },
-    text: 'Hello'
-},
-{
-    ID: 0,
-    user: {
-        ID: 0,
-        name: 'Alice'
-    },
-    text: 'Hello hlt'
-}
-]
-
-const testSurvey = {
-    text : "Title",
-    options : [
-        {
-            id : 0,
-            text : "Option1",
-            count : 0,
-        },
-        {
-            id : 1,
-            text : "Option2",
-            count : 0,
-        }
-    ],
-    owner : {
-        id : 0,
-        name : "hlt"
-    }
-}*/
-
 function ChatView(props) {
 
     const classes = useStyles();
 
     const [messages, setMessages] = useState([])
 
-    const [chatLoadState, setChatLoadState] = useState("init")
+    const [chatLoadState, setChatLoadState] = useState("loading")
     const messagesStateRef = useRef(messages);
     useEffect(
         () => {
@@ -85,16 +47,7 @@ function ChatView(props) {
         [messages],
     );
 
-    const [surveyDialogOpen, setSurveyDialogOpen] = React.useState(false)
-
-    const [surveys, /*setSurveys*/] = React.useState([])
-
-    /*setSurveyCreateMessageCallback((survey) => {
-        setSurveys([...surveys, survey])
-    })*/
-
-    if (chatLoadState === 'init') {
-        setChatLoadState("loading")
+    useEffect(()=>{
         getChat(props.roomID, (data, err) => {
             if (err) {
                 setChatLoadState("error")
@@ -104,7 +57,15 @@ function ChatView(props) {
             listenChatMessage(onChatMessage)
             if (data) setMessages(data)
         })
-    }
+    },[])
+
+    const [surveyDialogOpen, setSurveyDialogOpen] = React.useState(false)
+
+    const [surveys, /*setSurveys*/] = React.useState([])
+
+    /*setSurveyCreateMessageCallback((survey) => {
+        setSurveys([...surveys, survey])
+    })*/
 
     const addNewMessage = (message) => {
         const oldMessages = messagesStateRef.current

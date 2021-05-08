@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import LoginPage from './routes/LoginPage';
 import {
   BrowserRouter,
@@ -14,8 +14,16 @@ import { RealtimeMessageTransport } from './rmt/rtmt';
 
 window.rtmt = new RealtimeMessageTransport()
 
-
 function App() {
+  const [isAuth, setIsAuth] = useState(true);
+
+  useEffect(()=>{
+    window.onUnAuth = ()=>{
+      console.log("OnUnAuth");
+      setIsAuth(false)
+    }
+  },[]);
+
   return (
     <BrowserRouter>
       <Switch>
@@ -27,7 +35,7 @@ function App() {
           <RegisterPage />
         </Route>
         <Route path="/room/:id" children={<RoomPage />} />
-        <PrivateRoutes>
+        <PrivateRoutes isAuth={isAuth}>
           <Route path="/">
             <HomePage />
           </Route>
@@ -37,11 +45,11 @@ function App() {
   )
 }
 
-function PrivateRoutes({ children, ...rest }) {
+function PrivateRoutes({ children, isAuth, ...rest }) {
   return (
     <Route {...rest}
       render={({ location }) => {
-        if (window.currentUser()) {
+        if (window.currentUser() && isAuth) {
           return children;
         } else {
           return <Redirect to={{ pathname: "/login", state: { from: location } }}

@@ -9,13 +9,12 @@ export function loginUser(loginparameters, callback) {
         callback()
     }).catch(error => {
         if (error.response) {
-            if (error.response.status === 404) {
+            if (error.response.status === 409) {
                 callback("User or password wrong!")
             }
         } else {
             callback("Network error")
         }
-
     })
 }
 
@@ -25,7 +24,7 @@ export function registerUser(registerparameters, callback) {
     }).catch(error => {
         if (error.response) {
             if (error.response.status === 409) {
-                callback("User name already using :(. Try new one.")
+                callback("User name already using!")
             }
         } else {
             callback("Network error")
@@ -43,11 +42,3 @@ export function jwtKey() {
 }
 
 window.currentUser = jwtKey;
-
-export const loginRedirect = {
-    afterLogin: undefined,
-    onGotoLogin: () => {
-        console.log("a");
-    }
-
-}

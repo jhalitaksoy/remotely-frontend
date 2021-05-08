@@ -6,7 +6,7 @@ export function createRoom(room, callback) {
             callback()
         }).catch((error) => {
             console.log({error})
-            callback(undefined,"Error!")
+            callback(undefined,error)
         })
 }
 
@@ -17,7 +17,7 @@ export function joinRoom(id, callback) {
         callback()
     }).catch((error) => {
         console.log({error})
-        callback(undefined,"Error!")
+        callback(undefined,error)
     })
 }
 
@@ -26,8 +26,7 @@ export function listRooms(callback) {
     .then((response) => {
         callback(response.data)
     }).catch((error) => {
-        console.log({error})
-        callback(undefined,"Error!")
+        callback(undefined,error)
     })
 }
 
@@ -36,7 +35,12 @@ export function getRoom(id, callback) {
     .then((response) => {
         callback(response.data)
     }).catch((error) => {
-        console.log({error})
-        callback(undefined,"Error!")
+        if (error.response) {
+            if (error.response.status === 404) {
+                callback(undefined, "Room Not Found!")
+                return
+            }
+        } 
+        callback(undefined, error)
     })
 }

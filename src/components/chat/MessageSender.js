@@ -9,6 +9,7 @@ const useStyles = makeStyles((thme) => ({
         display: 'flex',
         padding: '10px',
         background: 'white',
+        alignSelf:"stretch"
     }
 }))
 
@@ -34,6 +35,7 @@ const MessageSender = (props) => {
     }
     return (<div className={classes.messageSender}>
         <TextField
+        style={{flexGrow:"1"}}
             placeholder="Type Message"
             value={message}
             onChange={onMessageChange}

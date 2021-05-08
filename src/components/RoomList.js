@@ -15,10 +15,12 @@ function RoomList(props) {
     
     const [rooms, setRooms] = useState(undefined)
     const [roomsLoadState, setRoomsLoadState] = useState("loading")
+    const [roomLoadError, setRoomLoadError] = useState();
 
     const loadRooms = () => {
         listRooms((res, err) => {
             if (err) {
+                setRoomLoadError(err)
                 setRoomsLoadState('error')
                 return
             }
@@ -50,7 +52,7 @@ function RoomList(props) {
         child = (
             <Box margin='20px'>
                 <Typography variant='body1' align={'center'}>
-                    Error
+                    {roomLoadError.toString()}
                 </Typography>
             </Box>
         )

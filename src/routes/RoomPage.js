@@ -1,4 +1,4 @@
-import { Box, Button, Toolbar } from '@material-ui/core';
+import { Box, Button, CircularProgress, Toolbar } from '@material-ui/core';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MyAppBar from '../components/MyAppBar';
@@ -50,6 +50,7 @@ function RoomPage(params) {
     //const [connectionState, setConnectionState] = useState("empty")
     const [streamController, setStreamController] = useState(undefined)
     const [roomLoadState, setRoomLoadState] = useState("loading")
+    const [roomLoadError, setRoomLoadError] = useState();
     const [micState, setMicState] = useState(false)
 
     const updateMicState = () => {
@@ -61,22 +62,27 @@ function RoomPage(params) {
 
 
     useEffect(() => {
-        if (roomLoadState !== "loaded") {
-            getRoom(id, (res, err) => {
-                if (err) {
-                    setRoomLoadState("error")
-                    return
-                }
-                setRoomLoadState("loaded")
-                setRoom(res)
-                const streamController = new StreamController()
-                setStreamController(streamController)
-                streamController.start(res.ID, onStatusChange)
-                streamController.join(micState)
-                //updateMicState()
-            })
+        getRoom(id, (res, err) => {
+            if (err) {
+                setRoomLoadError(err)
+                setRoomLoadState("error")
+                return
+            }
+            setRoomLoadState("loaded")
+            setRoom(res)
+            const streamController = new StreamController()
+            setStreamController(streamController)
+            streamController.start(res.ID, onStatusChange)
+            streamController.join(micState)
+            //updateMicState()
+        })
+
+        return () => {
+            if (streamController) {
+                streamController.cancel()
+            }
         }
-    })
+    }, [])
 
     // Select elements here
     const video = document.getElementById('id_video');
@@ -91,8 +97,6 @@ function RoomPage(params) {
             }
         }
     }
-
-
 
     const onStatusChange = (text) => {
         //setConnectionState(text)
@@ -114,20 +118,23 @@ function RoomPage(params) {
     let content;
 
     if (roomLoadState === "loading") {
-        content =
-            <Box display="flex" height="100%" flexDirection="column">
-                <div>Loading</div>
-            </Box>
+        content = (
+            <Container>
+                <CircularProgress />
+            </Container>
+        )
     } else if (roomLoadState === "error") {
-        content =
-            <Box display="flex" height="100%" flexDirection="column">
-                <div>Not Found</div>
-            </Box>
+        content = (
+            <Container>
+                <div>{roomLoadError.toString()}</div>
+            </Container>
+        )
     } else if (!room) {
-        content =
-            <Box display="flex" height="100%" flexDirection="column">
-                <div>Not Found</div>
-            </Box>
+        content = (
+            <Container>
+                <div>Internal Error</div>
+            </Container>
+        )
     } else {
         let roomID = undefined
         if (room) roomID = room.ID
@@ -158,6 +165,13 @@ function RoomPage(params) {
     }
 
     return (content)
+}
+
+function Container({ children }) {
+    return (
+        <Box display="flex" height="100%" flexDirection="column" alignItems="center" justifyContent="center">
+            {children}
+        </Box>)
 }
 
 export default RoomPage

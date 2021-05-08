@@ -30,10 +30,11 @@ export function post(route, data) {
             if (error.response) {
                 if(error.response.status === 401){
                     logoutUser()
-                }else{
-                    reject(error)
+                    window.onUnAuth()
+                    return
                 }
-              }
+            }
+            reject(error)
         })
      });
 }
