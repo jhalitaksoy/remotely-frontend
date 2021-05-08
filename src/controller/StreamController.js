@@ -14,17 +14,17 @@ const ChannelSDP = "sdp"
 
 export class StreamController {
 
-    constructor(){
-        this.listenSdp()
+    constructor() {
+        //this.listenSdp()
     }
 
-    async listenSdp(){
-          window.rtmt.listenMessage(ChannelSDP, (message)=>{
+    async listenSdp() {
+        window.rtmt.listenMessage(ChannelSDP, (message) => {
             this.onSdpMessage(this, message)
         })
     }
 
-    async onSdpMessage(_this, message){
+    async onSdpMessage(_this, message) {
         console.log("OnSDPMesssage");
         const textDecoder = new TextDecoder("utf-8")
         let json = textDecoder.decode(message)
@@ -37,13 +37,12 @@ export class StreamController {
         json = JSON.stringify(sdp)
         const textEncoder = new TextEncoder("utf-8")
         const sdpBytes = textEncoder.encode(json)
-        window.rtmt.sendMessage(ChannelSDP,sdpBytes)
+        window.rtmt.sendMessage(ChannelSDP, sdpBytes)
     }
 
     start(roomid, setOnlineStatus) {
         this.pc = this.createPC();
         this.handleConnectionStatus(setOnlineStatus)
-        this.canvas = document.getElementById('id_canvas');
         this.video = document.getElementById("id_video");
         this.videoContainer = {
             video: this.video,
@@ -76,10 +75,7 @@ export class StreamController {
 
     async publish(micstate) {
         this.pc.onicecandidate = this.handleICECandidate("Publisher");
-        //this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
-        for (let index = 0; index < 10; index++) {
-            this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
-        }
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
 
         this.createDataChannel(this.pc)
@@ -100,10 +96,7 @@ export class StreamController {
         this.pc.onicecandidate = this.handleICECandidate(id);
 
         this.pc.addTransceiver('video', { 'direction': 'recvonly' });
-
-        for (let index = 0; index < 10; index++) {
-            this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
-        }
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
 
         this.createDataChannel(this.pc)
@@ -152,37 +145,6 @@ export class StreamController {
         return this;
     }
 
-    readyToPlayVideo(event) {
-        // the video may not match the canvas size so find a scale to fit
-        instance.videoContainer.scale = Math.min(
-            this.width / this.videoWidth,
-            this.height / this.videoHeight);
-        let scale = instance.videoContainer.scale;
-        let vidH = instance.videoContainer.video.videoHeight * scale;
-        let vidW = instance.videoContainer.video.videoWidth * scale;
-        let top = instance.canvas.height / 2 - (vidH / 2);
-        let left = instance.canvas.width / 2 - (vidW / 2);
-        // the video can be played so hand it off to the display function
-        instance.draw(top, left, vidH, vidW)
-    }
-
-    draw(top, left, vidH, vidW) {
-        let updateCanvas = function () {
-            // only draw if loaded and ready
-            if (instance.videoContainer !== undefined && instance.videoContainer.ready) {
-                //let json = videoContainer.json;
-                // now just draw the video the correct size
-                instance.ctx.drawImage(instance.videoContainer.video, left, top, vidW, vidH);
-                //drawRectangle(ctx, json.x, json.y, json.width, json.height);
-                //drawText(ctx, json.text);
-            }
-            // all done for display 
-            // request the next frame in 1/60th of a second
-            requestAnimationFrame(updateCanvas);
-        }
-        requestAnimationFrame(updateCanvas);
-    }
-
     async createAudioStream(pc, micstate) {
         const streamAudio = await navigator.mediaDevices.getUserMedia({
             audio: true,
@@ -228,10 +190,9 @@ export class StreamController {
     handleICECandidate(username) {
         return async function (event) {
             try {
-                log("ICECandidate: " + event.candidate)
+                console.log("ICECandidate: " + event.candidate)
                 if (event.candidate === null/* && !instance.sdpSended*/) {
                     instance.sdpSended = true;
-                    //document.getElementById('finalLocalSessionDescription').value = JSON.stringify(pc.localDescription)
                     let msg = {
                         Name: username,
                         SD: instance.pc.localDescription
@@ -246,7 +207,7 @@ export class StreamController {
                 }
             }
             catch (e) {
-                log(e)
+                console.log(e)
             }
         }
     }
@@ -280,14 +241,14 @@ export class StreamController {
             return json.SD
         }
         catch (e) {
-            log(e);
+            console.log(e);
         }
     }
 
     // Set the handler for ICE connection state
     // This will notify you when the peer has connected/disconnected
     handleICEConnectionStateChange(event) {
-        log("ICEConnectionStateChange: " + instance.pc.iceConnectionState)
+        console.log("ICEConnectionStateChange: " + instance.pc.iceConnectionState)
     };
 
     // pc.onnegotiationneeded = handleNegotiationNeeded;
@@ -297,7 +258,7 @@ export class StreamController {
     handleGetUserMediaError(e) {
         switch (e.name) {
             case "NotFoundError":
-                log("Unable to open your call because no camera and/or microphone" +
+                console.log("Unable to open your call because no camera and/or microphone" +
                     "were found.");
                 break;
             case "SecurityError":
@@ -305,7 +266,7 @@ export class StreamController {
                 // Do nothing; this is the same as the user canceling the call.
                 break;
             default:
-                log("Error opening your camera and/or microphone: " + e.message);
+                console.log("Error opening your camera and/or microphone: " + e.message);
                 break;
         }
     }
@@ -324,9 +285,4 @@ class HttpError extends Error {
         this.name = 'HttpError';
         this.response = response;
     }
-}
-
-var log = msg => {
-    console.log(msg);
-    //document.getElementById('logs').innerHTML += msg + '<br>'
 }
