@@ -1,5 +1,3 @@
-import { serverUrl } from "../service/NetworkService";
-
 var mediaConstraints = {
     audio: false, // We dont want an audio track
     video: true // ...and we want a video track
@@ -10,22 +8,33 @@ export let dataChannel = {}
 
 let instance;
 
-const ChannelSDP = "sdp"
+const ChannelSDPAnswer = "sdp_answer"
+const ChannelSDPOffer = "sdp_offer"
+const ChannelICE = "ice"
 
 export class StreamController {
 
     constructor() {
-        //this.listenSdp()
+        this.listenMessages()
+        this.sended = false;
     }
 
-    async listenSdp() {
-        window.rtmt.listenMessage(ChannelSDP, (message) => {
-            this.onSdpMessage(this, message)
+    async listenMessages() {
+        window.rtmt.listenMessage(ChannelSDPOffer, (message) => {
+            this.onSdpOfferMessage(this, message)
+        })
+
+        window.rtmt.listenMessage(ChannelSDPAnswer, (message) => {
+            this.onSdpAnswerMessage(this, message)
+        })
+
+        window.rtmt.listenMessage(ChannelICE, (message) => {
+            //this.onICEMessage(this, message)
         })
     }
 
-    async onSdpMessage(_this, message) {
-        console.log("OnSDPMesssage");
+    async onSdpOfferMessage(_this, message) {
+        console.log("onSdpOfferMessage");
         const textDecoder = new TextDecoder("utf-8")
         let json = textDecoder.decode(message)
         const remoteSDP = JSON.parse(json)
@@ -35,12 +44,60 @@ export class StreamController {
         _this.pc.setLocalDescription(sdp)
 
         json = JSON.stringify(sdp)
+        console.log(json)
         const textEncoder = new TextEncoder("utf-8")
         const sdpBytes = textEncoder.encode(json)
-        window.rtmt.sendMessage(ChannelSDP, sdpBytes)
+        window.rtmt.sendMessage(ChannelSDPAnswer, sdpBytes)
     }
 
-    start(roomid, setOnlineStatus) {
+    async onSdpAnswerMessage(_this, message) {
+        console.log("onSdpAnswerMessage");
+        const textDecoder = new TextDecoder("utf-8")
+        let json = textDecoder.decode(message)
+        const remoteSDP = JSON.parse(json)
+        await _this.pc.setRemoteDescription(remoteSDP)
+    }
+
+    async sendOffer() {
+        console.log("Sending Offer");
+        const sdp = await this.pc.createOffer()
+        this.pc.setLocalDescription(sdp)
+
+        const json = JSON.stringify(sdp)
+        const textEncoder = new TextEncoder("utf-8")
+        const sdpBytes = textEncoder.encode(json)
+        window.rtmt.sendMessage(ChannelSDPOffer, sdpBytes)
+    }
+
+    async onICEMessage(_this, message) {
+        console.log("OnICEMesssage");
+        const textDecoder = new TextDecoder("utf-8")
+        let iceCandidateText = textDecoder.decode(message)
+        const iceCandidateInit = JSON.parse(iceCandidateText)
+        if (iceCandidateInit.candidate != null) {
+            await _this.pc.addIceCandidate(iceCandidateInit)
+        }
+    }
+
+    handleICECandidate(username) {
+        return async function (event) {
+            console.log({ "ICECandidate ": event.candidate });
+            if (event.candidate) {
+                console.log("candidate send");
+                const textEncoder = new TextEncoder("utf-8")
+                const iceBytes = textEncoder.encode(JSON.stringify(event.candidate))
+                window.rtmt.sendMessage(ChannelICE, iceBytes)
+            } else {
+                if (!instance.sended) {
+                    instance.sended = true;
+                    instance.sendOffer()
+                }
+
+            }
+        }
+    }
+
+    async start(roomid, setOnlineStatus) {
         this.pc = this.createPC();
         this.handleConnectionStatus(setOnlineStatus)
         this.video = document.getElementById("id_video");
@@ -94,8 +151,25 @@ export class StreamController {
         let id = "Client:" + timestamp.toString() + ":" + rnd.toString()
 
         this.pc.onicecandidate = this.handleICECandidate(id);
+        this.pc.onnegotiationneeded = async () => {
+            /*console.log("onnegotiationneeded");
+            try {
+                const offer = await this.createOffer(instance.pc)
+                let msg = {
+                    Name: "Client",
+                    SD: offer
+                };
+                window.rtmt.sendMessage(ChannelSDPAnswer, JSON.stringify(msg))
+                //await instance.pc.setRemoteDescription(new RTCSessionDescription(sdp))
+            }
+            catch (e) {
+                console.log(e)
+            }*/
+        }
 
         this.pc.addTransceiver('video', { 'direction': 'recvonly' });
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
+        this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.addTransceiver('audio', { 'direction': 'recvonly' });
         this.pc.ontrack = this.handleTrack;
 
@@ -111,7 +185,8 @@ export class StreamController {
         var id = 0
         let dataChannel = pc.createDataChannel(id)
         this.dataChannel = dataChannel
-        window.rtmt.setDataChannel(dataChannel)
+        //look later 
+        //window.rtmt.setDataChannel(dataChannel)
     }
 
     handleConnectionStatus(setOnlineStatus) {
@@ -185,32 +260,14 @@ export class StreamController {
     async createOffer(pc) {
         let offer = await instance.pc.createOffer()
         await instance.pc.setLocalDescription(offer)
+        return offer
     }
 
-    handleICECandidate(username) {
-        return async function (event) {
-            try {
-                console.log("ICECandidate: " + event.candidate)
-                if (event.candidate === null/* && !instance.sdpSended*/) {
-                    instance.sdpSended = true;
-                    let msg = {
-                        Name: username,
-                        SD: instance.pc.localDescription
-                    };
-                    let route = "/stream/sdp/"
-                    if (window.currentUser()) {
-                        route = "/stream_private/sdp/"
-                    }
-                    let sdp = await instance.sendToServer(serverUrl() + route + instance.roomid, JSON.stringify(msg))
-                    console.log({ sdp })
-                    await instance.pc.setRemoteDescription(new RTCSessionDescription(sdp))
-                }
-            }
-            catch (e) {
-                console.log(e)
-            }
-        }
-    }
+
+    handleICEConnectionStateChange(event) {
+        console.log("ICEConnectionStateChange: " + instance.pc.iceConnectionState)
+    };
+
 
     async sendToServer(url, msg) {
         try {
@@ -237,19 +294,12 @@ export class StreamController {
             } else {
                 throw new HttpError(response);
             }
-            //document.getElementById('remoteSessionDescription').value = JSON.stringify(json.SD)
             return json.SD
         }
         catch (e) {
             console.log(e);
         }
     }
-
-    // Set the handler for ICE connection state
-    // This will notify you when the peer has connected/disconnected
-    handleICEConnectionStateChange(event) {
-        console.log("ICEConnectionStateChange: " + instance.pc.iceConnectionState)
-    };
 
     // pc.onnegotiationneeded = handleNegotiationNeeded;
     // function handleNegotiationNeeded(){
