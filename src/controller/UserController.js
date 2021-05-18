@@ -42,3 +42,5 @@ export function jwtKey() {
 }
 
 window.currentUser = jwtKey;
+
+window.jwtKey = jwtKey;
