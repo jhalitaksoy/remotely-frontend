@@ -1,6 +1,6 @@
 
 import { decode, encode } from '../util/encode_decode_message';
-export class RealtimeMessageTransport {
+export class RealtimeMessageTransportDC {
 
     constructor() {
         this.messageChannels = {}
