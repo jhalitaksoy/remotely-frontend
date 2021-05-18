@@ -10,9 +10,9 @@ import HomePage from './routes/HomePage';
 import RegisterPage from './routes/RegisterPage';
 import RoomPage from './routes/RoomPage';
 import ChatView from './components/chat/ChatView';
-import { RealtimeMessageTransport } from './rmt/rtmt';
+import { RealtimeMessageTransportWS } from './rmt/rtmt_websocket';
 
-window.rtmt = new RealtimeMessageTransport()
+window.rtmt = new RealtimeMessageTransportWS()
 
 function App() {
   const [isAuth, setIsAuth] = useState(true);

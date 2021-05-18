@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Toolbar } from '@material-ui/core';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MyAppBar from '../components/MyAppBar';
-import { getRoom } from '../controller/RoomController';
+import { getRoom, joinRoom } from '../controller/RoomController';
 import { StreamController } from '../controller/StreamController';
 import { makeStyles } from '@material-ui/core/styles'
 import ChatView from '../components/chat/ChatView';
@@ -68,13 +68,22 @@ function RoomPage(params) {
                 setRoomLoadState("error")
                 return
             }
-            setRoomLoadState("loaded")
-            setRoom(res)
-            const streamController = new StreamController()
-            setStreamController(streamController)
-            streamController.start(res.ID, onStatusChange)
-            streamController.join(micState)
-            //updateMicState()
+            joinRoom(id, (res2, err) => {
+                if (err) {
+                    setRoomLoadError(err)
+                    setRoomLoadState("error")
+                    return
+                }
+                setRoomLoadState("loaded")
+                setRoom(res)
+
+                window.rtmt.initWebSocket(id, () => {
+                    const streamController = new StreamController()
+                    setStreamController(streamController)
+                    streamController.start(res.ID, onStatusChange)
+                    streamController.join(micState) //updateMicState()
+                })
+            })
         })
 
         return () => {
