@@ -9,7 +9,6 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
@@ -61,9 +60,9 @@ function HomePage(props) {
         setCreateRoomDialogOpen(false)
     }
 
-    const handleSnackBarClick = () => {
+    /*const handleSnackBarClick = () => {
         setSnackBarOpen(true);
-    };
+    };*/
 
     const handleSnackBarClose = (event, reason) => {
         if (reason === 'clickaway') {

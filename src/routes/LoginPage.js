@@ -1,7 +1,7 @@
 import { Box, Button, Card, TextField, Typography } from '@material-ui/core';
 import React from 'react';
 import { useState } from 'react';
-import { loginUser, registerUser } from '../controller/UserController';
+import { loginUser } from '../controller/UserController';
 import { useHistory } from "react-router-dom";
 
 function LoginPage(props) {

@@ -38,7 +38,7 @@ function ChatView(props) {
 
     const [messages, setMessages] = useState([])
 
-    const [chatLoadState, setChatLoadState] = useState("loading")
+    const [/*chatLoadState*/, setChatLoadState] = useState("loading")
     const messagesStateRef = useRef(messages);
     useEffect(
         () => {
