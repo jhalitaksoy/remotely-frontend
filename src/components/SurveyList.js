@@ -5,6 +5,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import { voteSurvey } from '../controller/ChatController';
 
 export default function SurveyList(props) {
     return (
@@ -31,11 +32,10 @@ function Survey(props) {
     const onVoteClick = (e) => {
         for (const option of survey.options) {
             if (option.text === value) {
-                //voteSurvey(survey.ID, option.id)
+                voteSurvey(survey.ID, option.id)
                 return;
             }
         }
-        prompt("Internal Error")
     }
 
     let vote;

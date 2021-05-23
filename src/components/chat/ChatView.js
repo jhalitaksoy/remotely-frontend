@@ -3,9 +3,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import MessageList from './MessageList';
 import MessageSender from './MessageSender';
 import { useState, useRef, useEffect } from 'react';
-import { getChat, sendChatMessage, listenChatMessage } from '../../controller/ChatController';
+import { getChat, sendChatMessage, listenChatMessage, listenOnSurveyCreate, 
+    listenOnSurveyDestroy, listenOnSurveyUpdate, createSurvey } from '../../controller/ChatController';
 import { Button, Chip, Dialog, TextField, Typography } from '@material-ui/core';
-//import MoreIcon from '@material-ui/icons/MoreVertOutlined';
+import MoreIcon from '@material-ui/icons/MoreVertOutlined';
 import SurveyList from '../SurveyList';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
@@ -36,36 +37,46 @@ function ChatView(props) {
 
     const classes = useStyles();
 
+    const [chatLoadState, setChatLoadState] = useState("loading")
+
     const [messages, setMessages] = useState([])
 
-    const [/*chatLoadState*/, setChatLoadState] = useState("loading")
-    const messagesStateRef = useRef(messages);
-    useEffect(
-        () => {
-            messagesStateRef.current = messages;
-        },
-        [messages],
-    );
+    const [surveys, setSurveys] = React.useState([])
 
-    useEffect(()=>{
-        getChat(props.roomID, (data, err) => {
-            if (err) {
-                setChatLoadState("error")
-                return
-            }
-            setChatLoadState("loaded")
-            listenChatMessage(onChatMessage)
-            if (data) setMessages(data)
-        })
-    },[])
+    const messagesStateRef = useRef(messages);
+    const surveysStateRef = useRef(surveys);
 
     const [surveyDialogOpen, setSurveyDialogOpen] = React.useState(false)
 
-    const [surveys, /*setSurveys*/] = React.useState([])
+    useEffect(
+        () => {
+            messagesStateRef.current = messages;
+            surveysStateRef.current = surveys
+        },
+        [messages, surveys],
+    );
 
-    /*setSurveyCreateMessageCallback((survey) => {
-        setSurveys([...surveys, survey])
-    })*/
+    useEffect(
+        () => {
+            setChatLoadState("loading")
+            getChat(props.roomID, (data, err) => {
+                if (err) {
+                    setChatLoadState("error")
+                    return
+                }
+                setChatLoadState("loaded")
+                listenChatMessage(onChatMessage)
+                if (data) setMessages(data)
+            })
+
+            listenOnSurveyCreate(onSurveyCreate)
+            listenOnSurveyDestroy(onSurveyEnd)
+            listenOnSurveyUpdate(onSurveyUpdate)
+
+            return ()=>{
+                //todo : unlisten message channels
+            }
+        }, [],)
 
     const addNewMessage = (message) => {
         const oldMessages = messagesStateRef.current
@@ -80,62 +91,74 @@ function ChatView(props) {
         sendChatMessage(message)
     }
 
-    /*const handleChatOpen = () => {
+    const handleChatOpen = () => {
         setSurveyDialogOpen(true)
-        //createSurvey({
-        //    "text": "surveyText",
-        //    "options": [
-        //        {
-        //            "id": 0,
-        //            "text": "option1",
-        //            "count": 0,
-        //        },
-        //        {
-        //            "id": 0,
-        //            "text": "option2",
-        //            "count": 0,
-        //        },
-        //    ],
-        //})
-    }*/
+        /*createSurvey({
+            "text": "surveyText",
+            "options": [
+                {
+                    "id": 0,
+                    "text": "option1",
+                    "count": 0,
+                },
+                {
+                    "id": 0,
+                    "text": "option2",
+                    "count": 0,
+                },
+            ],
+        })*/
+    }
 
     const handleClose = (value) => {
         setSurveyDialogOpen(false);
     };
 
+    const onSurveyCreate = (survey)=>{
+        setSurveys([...surveys, survey])
+    }
 
-    /*const onSurveyEnd = (surveyID) => {
+    const onSurveyEnd = (surveyID) => {
         const survey = getSurveyByID(surveyID)
         const index = surveys.indexOf(survey)
 
         surveys.splice(index, 1)
         setSurveys([...surveys])
-    }*/
+    }
 
-    /*const getSurveyByID = (surveyID) => {
-        for (const survey of surveys) {
+    const getSurveyByID = (surveyID) => {
+        for (const survey of surveysStateRef.current) {
             if (survey.ID === surveyID) {
                 return survey
             }
         }
-    }*/
+    }
 
-    //setSurveyEndMessageCallback(onSurveyEnd)
+    const getSurveyIndexByID = (surveyID) => {
+        let i = 0
+        for (const survey of surveysStateRef.current) {
+            if (survey.ID === surveyID) {
+                return i
+            }
+            i++;
+        }
+    }
 
-    /*const onSurveyUpdate = (survey) => {
-        const surveyFound = getSurveyByID(survey.ID)
-        const index = surveys.indexOf(surveyFound)
-        surveys[index] = survey
-        setSurveys([...surveys])
-    }*/
-
-    //setSurveyUpdateMessageCallback(onSurveyUpdate)
+    const onSurveyUpdate = (survey) => {
+        const index = getSurveyIndexByID(survey.ID)
+        if(index < 0){
+            console.log("Survey not found");
+            return
+        }
+        surveysStateRef.current[index] = survey
+        setSurveys([...surveysStateRef.current])
+    }
 
     return (
         <div className={classes.container}>
             <div className={classes.chatTitle}>
                 <Typography variant="h5">Chat</Typography>
-                {/*<Button style={{ marginLeft: "auto" }} onClick={handleChatOpen}><MoreIcon /></Button>*/}
+                {<Button style={{ marginLeft: "auto" }} onClick={handleChatOpen}><MoreIcon /></Button>}
             </div>
             <SurveyList surveys={surveys} />
             <MessageList messages={messages} />
@@ -196,13 +219,13 @@ function SurveyDialog(props) {
 
     const onSurveyCreate = () => {
         props.onClose()
-        /*createSurvey({
+        createSurvey({
             "text": surveyText,
             "options": getOptions(),
-        })*/
+        })
     }
 
-    /*const getOptions = () => {
+    const getOptions = () => {
         let count = -1
         return options.map((option) => {
             count++
@@ -212,7 +235,7 @@ function SurveyDialog(props) {
                 "count": 0,
             }
         })
-    }*/
+    }
 
     return (
         <Dialog open={props.open} onClose={props.onClose} >
@@ -228,7 +251,6 @@ function SurveyDialog(props) {
                 </IconButton>
 
             </MuiDialogTitle>
-            {/*<DialogTitle>Create Survey</DialogTitle>*/}
             <div style={{
                 padding: "0px 20px 20px 25px",
                 display: 'flex',
