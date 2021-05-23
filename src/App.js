@@ -49,7 +49,7 @@ function PrivateRoutes({ children, isAuth, ...rest }) {
   return (
     <Route {...rest}
       render={({ location }) => {
-        if (window.currentUser() && isAuth) {
+        if (window.jwtKey() && isAuth) {
           return children;
         } else {
           return <Redirect to={{ pathname: "/login", state: { from: location } }}

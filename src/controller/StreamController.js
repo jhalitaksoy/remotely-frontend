@@ -271,12 +271,12 @@ export class StreamController {
 
     async sendToServer(url, msg) {
         try {
-            const user = window.currentUser()
+            const jwt = window.jwtKey()
             let headers = {
                 'Content-Type': 'text/plain; charset=utf-8',
             }
-            if (user) {
-                headers['Authorization'] = "Bearer " + user
+            if (jwt) {
+                headers['Authorization'] = "Bearer " + jwt
             }
             let response = await fetch(url, {
                 method: 'POST',

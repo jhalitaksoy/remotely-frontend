@@ -21,12 +21,7 @@ const MessageSender = (props) => {
     }
 
     const onSendMessage = () => {
-        const user = window.currentUser
         const newMessage = {
-            user: {
-                ID: parseInt(user.id),
-                name: '',
-            },
             text: message,
         }
         props.onSendMessage(newMessage)

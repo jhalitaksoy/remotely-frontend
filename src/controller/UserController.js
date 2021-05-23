@@ -1,11 +1,9 @@
-//
 import { post } from '../service/NetworkService';
-// user.name 
-//
+
 export function loginUser(loginparameters, callback) {
     post(`/user/login`, loginparameters).then(response => {
-        const jwt = response.data
-        window.localStorage.setItem("jwt", jwt)
+        const loginResult = response.data
+        storeLoginResult(loginResult)
         callback()
     }).catch(error => {
         if (error.response) {
@@ -32,15 +30,35 @@ export function registerUser(registerparameters, callback) {
     })
 }
 
+const keyjwt = "jwt"
+const keyuserid = "user_id"
+const keyusername = "user_name"
+
+function storeLoginResult(loginResult) {
+    window.localStorage.setItem(keyjwt, loginResult.jwt_token)
+    window.localStorage.setItem(keyuserid, loginResult.id)
+    window.localStorage.setItem(keyusername, loginResult.name)
+}
+
 export function logoutUser() {
-    window.localStorage.removeItem("jwt")
+    window.localStorage.removeItem(keyjwt)
+    window.localStorage.removeItem(keyuserid)
+    window.localStorage.removeItem(keyusername)
 }
 
 export function jwtKey() {
-    const jwt = window.localStorage.getItem("jwt")
-   return jwt
+    const jwt = window.localStorage.getItem(keyjwt)
+    return jwt
 }
 
-window.currentUser = jwtKey;
+export function currentUser() {
+    const id = window.localStorage.getItem(keyuserid)
+    const name = window.localStorage.getItem(keyusername)
+    return {
+        id: id,
+        name: name,
+    }
+}
 
+window.currentUser = currentUser;
 window.jwtKey = jwtKey;
