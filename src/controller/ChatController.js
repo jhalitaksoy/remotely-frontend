@@ -1,4 +1,5 @@
 import { post } from '../service/NetworkService';
+import { decodeText, encodeText } from '../util/byte_util';
 
 /// chat message
 
@@ -16,37 +17,29 @@ export function getChat(roomid, callback) {
 
 export function sendChatMessage(message) { 
     const json = JSON.stringify(message)
-    console.log(json);
-    const textEncoder = new TextEncoder("utf-8")
-    const messageBytes = textEncoder.encode(json)
-    window.rtmt.sendMessage(ChannelChat,messageBytes)
+    const bytes = encodeText(json)
+    window.rtmt.sendMessage(ChannelChat,bytes)
 }
 
 export function listenChatMessage(callback){
     window.rtmt.listenMessage(ChannelChat, (message)=>{
-        const textDecoder = new TextDecoder("utf-8")
-        const json = textDecoder.decode(message)
+        const json = decodeText(message)
         const chatMessage = JSON.parse(json)
         callback(chatMessage)
     })
 }
 
 /// survey
-/*
-export function createSurvey(survey) {
-    //dataChannel.send(encode(messageTypes.surveyCreate, JSON.stringify(survey)))
-}
 
-export let onSurveyCreateMessageCallback = undefined
+const ChannelSurveyCreate = "survey_create"
+const ChannelSurveyDestroy = "survey_destroy"
+const ChannelSurveyUpdate  = "survey_update"
+const ChannelSurveyVote    = "survey_vote"
 
-export function setSurveyCreateMessageCallback(callback) { onSurveyCreateMessageCallback = callback }
-
-function onSurveyCreateMessage(message) {
-    let json = JSON.parse(message);
-    console.log("New Survey Create Message : " + message)
-    if (onSurveyCreateMessageCallback) {
-        onSurveyCreateMessageCallback(json)
-    }
+export function createSurvey(survey){
+    const json = JSON.stringify(survey)
+    const bytes = encodeText(json)
+    window.rtmt.sendMessage(ChannelSurveyCreate,bytes)
 }
 
 export function voteSurvey(surveyID, optionID) {
@@ -54,30 +47,31 @@ export function voteSurvey(surveyID, optionID) {
         "surveyID": surveyID,
         "optionID": optionID
     }
-    //dataChannel.send(encode(messageTypes.surveyVote, JSON.stringify(vote)))
+    const json = JSON.stringify(vote)
+    const bytes = encodeText(json)
+    window.rtmt.sendMessage(ChannelSurveyVote,bytes)
 }
 
-export let onSurveyUpdateMessageCallback = undefined
-
-export function setSurveyUpdateMessageCallback(callback) { onSurveyUpdateMessageCallback = callback }
-
-function onSurveyUpdateMessage(message) {
-    let json = JSON.parse(message);
-    console.log("New Survey Update. Message : " + message)
-    if (onSurveyUpdateMessageCallback) {
-        onSurveyUpdateMessageCallback(json)
-    }
+export function listenOnSurveyCreate(callback) {
+    window.rtmt.listenMessage(ChannelSurveyCreate, (bytes)=>{
+        const json = decodeText(bytes)
+        const survey = JSON.parse(json)
+        callback(survey)
+    })
 }
 
-export let onSurveyEndMessageCallback = undefined
+export function listenOnSurveyDestroy(callback) {
+    window.rtmt.listenMessage(ChannelSurveyDestroy, (bytes)=>{
+        const json = decodeText(bytes)
+        const survey = JSON.parse(json)
+        callback(survey.surveyID)
+    })
+}
 
-export function setSurveyEndMessageCallback(callback) { onSurveyEndMessageCallback = callback }
-
-function onSurveyEndMessage(message) {
-    let json = JSON.parse(message);
-    console.log("New Survey End. Message : " + message)
-    
-    if (onSurveyEndMessageCallback) {
-        onSurveyEndMessageCallback(json.surveyID)
-    }
-}*/
+export function listenOnSurveyUpdate(callback) {
+    window.rtmt.listenMessage(ChannelSurveyUpdate, (bytes)=>{
+        const json = decodeText(bytes)
+        const survey = JSON.parse(json)
+        callback(survey)
+    })
+}

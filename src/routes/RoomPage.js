@@ -136,7 +136,8 @@ function RoomPage(params) {
                 <MyAppBar title={room && room.Name} />
                 <Box display="flex" flexGrow="1">
                     <Box flex="3" display="flex" alignItems="center">
-                        <video preload="none" poster="none" controls={false} className={classes.video} id="id_video" autoPlay muted />
+                        <video 
+                        preload="none" poster="none" controls={false} className={classes.video} id="id_video" autoPlay muted />
                     </Box>
                     <Box flex="1" className={classes.chat}>
                         <ChatView roomID={roomID} />
