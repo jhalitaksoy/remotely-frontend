@@ -196,9 +196,6 @@ export class StreamController {
     }
 
     handleTrack(event) {
-        console.log("### Received track");
-        console.log(event.streams.length)
-        console.log(event.streams)
         var mediaStreamTrack = event.streams[0]
         if (mediaStreamTrack) {
             if (mediaStreamTrack.id === 'video') {
