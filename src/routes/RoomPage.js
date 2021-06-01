@@ -9,6 +9,7 @@ import ChatView from '../components/chat/ChatView';
 import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import ScreenShareSharpIcon from '@material-ui/icons/ScreenShareSharp';
+import { VolumeOff, VolumeUp } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,12 +53,22 @@ function RoomPage(params) {
     const [roomLoadState, setRoomLoadState] = useState("loading")
     const [roomLoadError, setRoomLoadError] = useState();
     const [micState, setMicState] = useState(false)
+    const [volumeState, setVolumeState] = useState(true)
 
     const updateMicState = () => {
         if (micState)
             streamController.pauseAudioSend();
         else
             streamController.resumeAudioSend();
+    }
+
+    const updateVolumeState = () => {
+        const audioBox = document.querySelector('audio#audioBox')
+        if (volumeState) {
+            audioBox.volume = 0
+        } else {
+            audioBox.volume = 1
+        }
     }
 
     const joinRoomAndInitWebSocket = (id, isPublisher, callback) => {
@@ -131,6 +142,11 @@ function RoomPage(params) {
         updateMicState()
     }
 
+    const onVolumeClick = (e) => {
+        setVolumeState(!volumeState)
+        updateVolumeState()
+    }
+
 
     let content;
 
@@ -168,15 +184,20 @@ function RoomPage(params) {
                     </Box>
                 </Box>
                 <Toolbar className={classes.toolbar}>
-                    <audio id="audioBox" autoPlay controls></audio>
+                    <audio id="audioBox" autoPlay controls={false}></audio>
+                    <Button variant="contained" color="primary" onClick={onOpenAudioClick}>
+                        {micState ? <MicIcon /> : <MicOffIcon />}
+                    </Button>
+                    <Box width="10px" />
+                    <Button variant="contained" color="primary"
+                        onClick={onVolumeClick}>
+                        {volumeState ? <VolumeUp /> : <VolumeOff />}
+                    </Button>
+                    <Box width="10px" />
                     <Button variant="contained" color="primary"
                         onClick={onShareScreenClick}>
                         <ScreenShareSharpIcon />
                         Screen Share
-                    </Button>
-                    <Box width="10px" />
-                    <Button variant="contained" color="primary" onClick={onOpenAudioClick}>
-                        {micState ? <MicIcon /> : <MicOffIcon />}
                     </Button>
                 </Toolbar>
             </Box>
