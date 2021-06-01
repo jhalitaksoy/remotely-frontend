@@ -95,7 +95,6 @@ function RoomPage(params) {
         })
     }
 
-
     useEffect(() => {
         getRoom(id, (res, err) => {
             if (err) {
@@ -113,20 +112,6 @@ function RoomPage(params) {
             }
         }
     }, [])
-
-    // Select elements here
-    const video = document.getElementById('id_video');
-    if (video) {
-        const videoControls = document.getElementById('video-controls');
-
-        const videoWorks = !!document.createElement('video').canPlayType;
-        if (videoWorks) {
-            video.controls = false;
-            if (videoControls) {
-                videoControls.classList.remove('hidden');
-            }
-        }
-    }
 
     const onStatusChange = (text) => {
         //setConnectionState(text)
@@ -146,7 +131,6 @@ function RoomPage(params) {
         setVolumeState(!volumeState)
         updateVolumeState()
     }
-
 
     let content;
 
@@ -177,7 +161,7 @@ function RoomPage(params) {
                 <Box display="flex" flexGrow="1">
                     <Box flex="3" display="flex" alignItems="center">
                         <video
-                            preload="none" poster="none" controls={false} className={classes.video} id="id_video" autoPlay muted />
+                            preload="none" poster="none" className={classes.video} id="id_video" autoPlay muted />
                     </Box>
                     <Box flex="1" className={classes.chat}>
                         <ChatView roomID={roomID} />

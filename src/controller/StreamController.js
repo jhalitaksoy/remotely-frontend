@@ -203,7 +203,6 @@ export class StreamController {
                 let el = document.getElementById('id_video');
                 el.srcObject = mediaStreamTrack
                 el.autoplay = true
-                el.controls = true
             } else if (event.streams[0].id === 'audio') {
                 const audioBox = document.querySelector('audio#audioBox')
                 console.log("Received audio track");
