@@ -1,6 +1,6 @@
 # remotely-frontend
 
-Remotely Web Application - WebRTC based online meeting web application.
+Remotely Web Application - WebRTC based online meeting
 
 Still Under Development
 
