@@ -60,6 +60,30 @@ function RoomPage(params) {
             streamController.resumeAudioSend();
     }
 
+    const joinRoomAndInitWebSocket = (id, isPublisher, callback) => {
+        const joinParameters = { isPublisher: isPublisher }
+        const body = JSON.stringify(joinParameters)
+        joinRoom(id, body, (res2, err) => {
+            if (err) {
+                setRoomLoadError(err)
+                setRoomLoadState("error")
+                return
+            }
+            setRoomLoadState("loaded")
+
+            window.rtmt.initWebSocket(id, () => {
+                const streamController = new StreamController()
+                setStreamController(streamController)
+                streamController.start(id, onStatusChange)
+                if (isPublisher) {
+                    streamController.publish(micState)
+                } else {
+                    streamController.join(micState) //updateMicState()}
+                }
+            })
+        })
+    }
+
 
     useEffect(() => {
         getRoom(id, (res, err) => {
@@ -68,22 +92,8 @@ function RoomPage(params) {
                 setRoomLoadState("error")
                 return
             }
-            joinRoom(id, (res2, err) => {
-                if (err) {
-                    setRoomLoadError(err)
-                    setRoomLoadState("error")
-                    return
-                }
-                setRoomLoadState("loaded")
-                setRoom(res)
-
-                window.rtmt.initWebSocket(id, () => {
-                    const streamController = new StreamController()
-                    setStreamController(streamController)
-                    streamController.start(res.ID, onStatusChange)
-                    streamController.join(micState) //updateMicState()
-                })
-            })
+            joinRoomAndInitWebSocket(id, false)
+            setRoom(res)
         })
 
         return () => {
@@ -113,9 +123,7 @@ function RoomPage(params) {
 
     const onShareScreenClick = (e) => {
         streamController.cancel()
-        streamController.start(room.ID, onStatusChange)
-        streamController.publish(micState)
-        //updateMicState()
+        joinRoomAndInitWebSocket(room.ID, true)
     }
 
     const onOpenAudioClick = (e) => {
@@ -152,8 +160,8 @@ function RoomPage(params) {
                 <MyAppBar title={room && room.Name} />
                 <Box display="flex" flexGrow="1">
                     <Box flex="3" display="flex" alignItems="center">
-                        <video 
-                        preload="none" poster="none" controls={false} className={classes.video} id="id_video" autoPlay muted />
+                        <video
+                            preload="none" poster="none" controls={false} className={classes.video} id="id_video" autoPlay muted />
                     </Box>
                     <Box flex="1" className={classes.chat}>
                         <ChatView roomID={roomID} />

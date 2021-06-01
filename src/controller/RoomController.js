@@ -11,8 +11,8 @@ export function createRoom(room, callback) {
 }
 
 
-export function joinRoom(id, callback) {
-    post(`/room/join/${id}`, "")
+export function joinRoom(id, joinParameters, callback) {
+    post(`/room/join/${id}`, joinParameters)
     .then((response) => {
         callback()
     }).catch((error) => {
