@@ -29,7 +29,7 @@ export class StreamController {
         })
 
         window.rtmt.listenMessage(ChannelICE, (message) => {
-            //this.onICEMessage(this, message)
+            this.onICEMessage(this, message)
         })
     }
 
