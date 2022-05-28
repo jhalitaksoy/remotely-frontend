@@ -6,14 +6,14 @@ export function serverUrl() {
     //return 'http://192.168.43.2:80' 
     //return 'http://127.0.0.1:8080'
     //return 'https://34.107.125.219'
-    return 'https://halitaksoy.com/remotely'
+    return 'https://segin.one/remotely-backend'
 }
 
 export function wsServerUrl() {
     //return 'ws://192.168.43.2:80' 
     //return 'ws://127.0.0.1:8080'
     //return 'ws://34.107.125.219'
-    return 'wss://halitaksoy.com/remotely'
+    return 'wss://segin.one/remotely-backend'
 }
 
 
